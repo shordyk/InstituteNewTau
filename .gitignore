@@ -1,0 +1,10 @@
+*.m~
+.DS_Store
+*.mat
+*.fig
+*.eps
+*.swp
+*.png
+*.nc
+*.gz
+*/figs/*
