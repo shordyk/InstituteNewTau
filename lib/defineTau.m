@@ -1,9 +1,9 @@
-function [tau_c] = defineTau(str,h_s_init,h_b_init,phi_init,phi_max,phi_min,S,x0)
+function [tau_c] = defineTau(str,h_s_init,h_b_init,phi_init,phi_max,phi_min,x0)
 % [tau_c] = defineTau(str,h_scale,h_s_init,h_b_init,phi_init,phi_max,xmin,xmax)
 % returns tau and string for requested string-name of tau scenario. 
 
     opt = false;
-    if(nargin == 12)
+    if(nargin == 11)
         opt = true;
     end
     if(str == "Uniform") % Uniform Plastic Bed, for reference, not in paper

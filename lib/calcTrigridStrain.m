@@ -1,4 +1,4 @@
-function [int] = calcTriGridStrain(u,v,xy,dx)
+function [int] = calcTrigridStrain(u,v,xy,dx)
     % Calculates strain on triangular nodes, returns on intpolation
     % function
     % elements
@@ -13,8 +13,8 @@ function [int] = calcTriGridStrain(u,v,xy,dx)
     vg = vs(Xi,Yi); % [m/s]
 
     %% Smooth
-    ug = imgaussfilt(ug,1);
-    vg = imgaussfilt(vg,1);
+%     ug = imgaussfilt(ug,1);
+%     vg = imgaussfilt(vg,1);
     
     %% Calc Strain on grid
     [n,m] = size(ug);
