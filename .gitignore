@@ -8,3 +8,4 @@
 *.nc
 *.gz
 */figs/*
+cvx/*
