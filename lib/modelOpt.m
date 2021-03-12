@@ -1,25 +1,14 @@
+function [resid] = modelOpt(x0,str)
+% Mapview code, bringing in Tau constraints from SedMap estimates.
 % Requires download and install the following software: 
 % Distmesh https://popersson.github.io/distmesh/index.html
 % CVX http://cvxr.com/cvx/download/
-% MEaSUREs matlab plug in + data files
-% https://www.mathworks.com/matlabcentral/fileexchange/47329-measures
-% BedMachine matlab plug in + data files
-% https://www.mathworks.com/matlabcentral/fileexchange/69159-bedmachine
-
-% clc
-% clear
-% close all
+% MEaSUREs matlab plug in https://www.mathworks.com/matlabcentral/fileexchange/47329-measures
+% BedMachine matlab plug in https://www.mathworks.com/matlabcentral/fileexchange/69159-bedmachine
 
 %% Initialization
-% Scenario to run if running one at a time comment out below, run this file
-% directly
 
-% str = 'Hydro';
-% mapFile = 'ThwaitesBasinGrid.mat';
-
-% Comment so we know what's happening, thats always nice.
-disp("Running " + str + " now...");
-
+mapFile = "gridInstitute5000.mat";
 % Load input files
 initializeInputs();
 
@@ -28,14 +17,13 @@ initializeModel();
 
 %% Define \tau
 % Define map of basal strength according to named scenario. 
-tau_c = defineTau(str,h_s_init,h_b_init,phi_init,phi_max,phi_min);
+tau_c = defineTau(str,h_s_init,h_b_init,phi_init,phi_max,phi_min,x0);
 
 %% Build System
 buildSystem();
 
-
 %% Thermomechanical coupling loop
-for t_i = 1:100  
+for t_i = 1:1%00  
     % Thermocouple fields to update everyloop
     % Strain rate [s^-1]
         ep_dot = calcTrigridStrain(u,v,xy,dx); %returns intperolation object
@@ -113,28 +101,98 @@ for t_i = 1:100
     %(uncomment to see avg temp, enhancement, and Pe, Lambda, Br every loop
 %     inLoopPlotting;
 end
-%% Save data to data file
-mpClean = erase(mapFile, [".mat","workingGrid_"]);
-save("data/data_" + mpClean + str + ".mat");
 
 %% Vis out of loop
-spd2 = measures_interp('speed',xy(:,1),xy(:,2)); %[m/yr]
+spd2 = measures_interp('speed',xy(:,1),xy(:,2));
+[u2,v2] = measures_interp('velocity',xy(:,1),xy(:,2)); %[m/yr]
 
-figure('Position', [0 0 1200 600]);
+spd_star = sqrt(v.^2+u.^2)*3.154E7;		
+gamma = 1e4; % 1e4 is even point, above weights log speeds more (3e5 for base cases)
+resid_xy = ((u*3.154e7-u2).^2 + (v*3.154e7-v2).^2 + gamma*log((spd_star+1)./(spd2+1)).^2).*F'/1e7; %% should weight each by D matrix
+resid = sum(resid_xy);
+
+figure(1)
 clf
-sgtitle(str);
+trisurf(t,xy(:,1),xy(:,2),resid_xy,...
+       'edgecolor','none')
+title('Residual Contribution')
+xlabel('X')
+ylabel('Y')
+colorbar
+view(2)
+% axis equal
+drawnow
+% resid1 = sum((u*3.154e7-u2).^2)
+% resid2 = sum((v*3.154e7-v2).^2)
+% resid3 = sum(log((spd_star+1)./(spd2+1)).^2)
+% gamma = (resid1+resid2)./resid3
+% figure
+% clf
+% trisurf(t_c,xy_c(:,1),xy_c(:,2),enhance.^(-nn),...
+%        'edgecolor','none')
+% title('Enhancement')
+% view(2)
+% axis equal
+% xlabel('X')
+% ylabel('Y')
+% colorbar
+
+% figure
+% clf
+% trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),phi_init(xy(:,1),xy(:,2)),...
+%        'edgecolor','none','facecolor','interp')
+% title('\phi')
+% view(2)
+% axis equal
+% hold on
+% tricontour(t,xy(:,1),xy(:,2),spd2,[10,30,100,300,1000,3000]);
+% xlabel('X')
+% ylabel('Y')
+% colorbar
+
+% figure('Position', [0 0 1200 600]);
+% clf
+% 
+% subplot(121)
+% ep = calcTrigridStrain(u2/3.154E7,v2/3.154E7,xy,dx);
+% trisurf(t_c,xy_c(:,1),xy_c(:,2),log10(subplus(ep(xy_c(:,1),xy_c(:,2)))),...
+%        'edgecolor','none')
+% colorbar
+% view(2)
+% title('Observed Strain')
+% 
+% subplot(122)
+% ep = calcTrigridStrain(u,v,xy,dx);
+% trisurf(t_c,xy_c(:,1),xy_c(:,2),log10(subplus(ep(xy_c(:,1),xy_c(:,2)))),...
+%        'edgecolor','none')
+% view(2)
+% colorbar
+% title('Model Strain')
+
+
+
+%figure('Position', [0 0 1200 600]);
+figure(3)
+clf
+set(gcf, 'defaultAxesFontName', 'National Park Regular',...
+'defaultTextFontName', 'National Park Regular');
+sgtitle(str + " X_0 = " + x0 +"; Time " + paulTime());
 subplot(141)
 
-trisurf(t,xy(:,1),xy(:,2),zeros(size(spd2)),log10(spd2),...
+trisurf(t,xy(:,1),xy(:,2),h_s_init(xy(:,1),xy(:,2)),log10(spd2),...
        'edgecolor','none')
 hold on
+trisurf(t,xy(:,1),xy(:,2),h_b_init(xy(:,1),xy(:,2)),...
+       'edgecolor','black','facecolor','none')
+
 title('Speed of Measures')
 xlabel('X')
 ylabel('Y')
 caxis([1 2.6]);
 colorbar
 view(2)
-axis equal
+% axis equal
+
 
 subplot(142)
 trisurf(t,xy(:,1),xy(:,2),h_s_init(xy(:,1),xy(:,2)),log10(sqrt(u.^2 + v.^2)*3.154E7),...
@@ -145,7 +203,7 @@ xlabel('X')
 ylabel('Y')
 colorbar
 view(2)
-axis equal
+% axis equal
 
 subplot(143)
 trisurf(t,xy(:,1),xy(:,2),tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2),...
@@ -154,17 +212,18 @@ hold on
 trisurf(t,xy(:,1),xy(:,2),h_b_init(xy(:,1),xy(:,2)),...
        'edgecolor','black','facecolor','none')
 colorbar
-caxis([50e3 150e3]);
+caxis([00e3 150e3]);
 colormap(gca, Cmap/255.0)
 title('Basal \tau')
 xlabel('X')
 ylabel('Y')
 view(2)
-axis equal
+% axis equal
 
 subplot(144)
 trisurf(t_c,xy_c(:,1),xy_c(:,2),df,...
     'edgecolor','none');
+    %'facecolor','interp');
 title('Driving force')
 xlabel('X')
 ylabel('Y')
@@ -172,4 +231,6 @@ colorbar
 caxis([0e3 150e3]);
 colormap(gca, Cmap/255.0)
 view(2)
-axis equal
+% axis equal
+
+end

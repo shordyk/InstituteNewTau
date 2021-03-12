@@ -1,3 +1,4 @@
+*.tab
 *.m~
 .DS_Store
 *.mat
@@ -9,3 +10,8 @@
 *.gz
 */figs/*
 cvx/*
+*.jpg
+*.xml
+*.xyz
+*.csv
+*.pdf

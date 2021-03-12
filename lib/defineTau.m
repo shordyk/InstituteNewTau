@@ -1,9 +1,9 @@
 function [tau_c] = defineTau(str,h_s_init,h_b_init,phi_init,phi_max,phi_min,x0)
-% [tau_c] = defineTau(str,h_scale,h_s_init,h_b_init,phi_init,phi_max,xmin,xmax)
+% [tau_c] = defineTau(str,h_s_init,h_b_init,phi_init,phi_max,phi_min,[x0])
 % returns tau and string for requested string-name of tau scenario. 
 
     opt = false;
-    if(nargin == 11)
+    if(nargin == 7)
         opt = true;
     end
     if(str == "Uniform") % Uniform Plastic Bed, for reference, not in paper
@@ -15,6 +15,18 @@ function [tau_c] = defineTau(str,h_s_init,h_b_init,phi_init,phi_max,phi_min,x0)
     
     tau_c = @(x,y,u,v) norms([u,v],2,2)... 
        .*yield_base; 
+   
+    elseif(str == "Case 1")  % Overburden Plastic Bed, Case 1
+    if(opt)
+        scale = abs(x0(1));
+        base = abs(x0(2));
+    else
+        scale = 43;
+        base = 40e3;
+    end
+    tau_c = @(x,y,u,v) (subplus((h_s_init(x,y)-h_b_init(x,y))...% Overburden
+       .*subplus(scale+base)))...   %tau values cannot be negative, give floor of 0
+       .*norms([u,v],2,2); 
     
     elseif(str == "Case 2")  % Depth weakening, Case 2
     if(opt)
@@ -62,18 +74,6 @@ function [tau_c] = defineTau(str,h_s_init,h_b_init,phi_init,phi_max,phi_min,x0)
        .*(1 - inPoly(x,y,S))... % 0 strength in lake regions
        .*norms([u,v],2,2);
  
-    elseif(str == "Case 1")  % Overburden Plastic Bed, Case 1
-    if(opt)
-        scale = abs(x0);
-        base = 25e3;
-    else
-        scale = 43;
-        base = 40e3;
-    end
-    tau_c = @(x,y,u,v) (subplus((h_s_init(x,y)-h_b_init(x,y))...% Overburden
-       .*scale+base))... 
-       .*norms([u,v],2,2); 
-    
     elseif(str == "Case 3.2") % Case 3.2
     load('Streams_BedMachine.mat','drain_dist'); %Comes from StreamRouting.m
     if(opt)

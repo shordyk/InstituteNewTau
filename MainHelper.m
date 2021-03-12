@@ -19,7 +19,7 @@ addpath('lib','lib/tricontour')
 
 % Name of scenarios to run, only 1 map file use here.
 nameToRun = ["Case 1"];
-mapsToRun = ["ThwaitesBasinGrid.mat"];
+mapsToRun = ["gridInstitute5000.mat"];
 
 for j = 1:length(mapsToRun)
     for i = 1:length(nameToRun)
