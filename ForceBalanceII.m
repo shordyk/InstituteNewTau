@@ -8,9 +8,9 @@ g = 9.81;
 B = 7.5e7; % A = 2.4e-24 Pa^(-3) s^(-1)
 overgrab = 0;
 xmax = -7e5;
-xmin = -10e5;
+xmin = -12e5;
 ymax =  5e5;
-ymin =  1e5;
+ymin =  -1e5;
 
 dx = 2e3;
 smth = 6e3;
@@ -129,7 +129,8 @@ setFontSize(16);
 c = colorbar;
 c.Label.String = 'Log_{10} Speed [m/yr]';
 ax(2) = subplot(122);
-p = surf(Xi,Yi,zeros(size(ss)),b_raw);
+% p = surf(Xi,Yi,zeros(size(ss)),b_raw);
+p = surf(Xi,Yi,b_raw);
 hold on
 contour(xi,yi,spd2, [10, 10] , 'k:','HandleVisibility','off')
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
@@ -140,7 +141,7 @@ set(p, 'edgecolor', 'none');
 colormap(ax(2),icey);
 caxis([-2000 500])
 view(2)
-axis equal
+% axis equal
 setFontSize(16);
 c = colorbar;
 c.Label.String = 'Bed Elevation [m]';
@@ -310,6 +311,26 @@ contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
 title('Lateral Stresses')
 allfig2(p,lat)
+
+%%
+
+figure(6)
+clf
+p = surf(Xi,Yi,b_raw,log10(spd2));
+hold on
+set(p, 'edgecolor', 'none');
+p = surf(Xi,Yi,sf_raw,log10(spd2),'facealpha',0.75);
+title('Elevation')
+set(p, 'edgecolor', 'none');
+% colormap(icey);
+% caxis([-2000 2000])
+% axis equal
+setFontSize(16);
+c = colorbar;
+c.Label.String = 'Bed Elevation [m]';
+colormap(icey);
+set(p, 'edgecolor', 'none');
+
 
 function [] = allfig(p)
 set(p, 'edgecolor', 'none');
