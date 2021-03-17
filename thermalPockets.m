@@ -93,9 +93,9 @@ if(file ~= "")
 end
 
 dist  = stop-start;
-xx    = start(1):dist(1)/200:stop(1);
-yy    = start(2):dist(2)/200:stop(2); 
-
+% xx    = start(1):dist(1)/200:stop(1);
+% yy    = start(2):dist(2)/200:stop(2); 
+[xx,yy] = ll2ps(Latitude,Longitude);
 % Grid to plot around transect
 dx = 1e3;
 smth = 10e3;
@@ -315,6 +315,17 @@ if(file ~= "")
     slowtime = 1:numel(Bottom);
     bedPower = 10*log10(interp2(slowtime,Time,Data,slowtime,Bottom_layer));
     
+    range_u = 30;
+    range_d = 40;
+    dt          = Time(2)-Time(1);
+    bed_i       = floor(Bottom_layer/dt);
+    Bottom_2    = zeros(size(Bottom_layer));
+    bedPower_2  = zeros(size(Bottom_layer));
+    for in = 1:numel(bed_i)
+    [bp,bed_2_i] = max(Data((bed_i(in)-range_u):(bed_i(in)+range_d) ,in)); % Find max in neighborhood
+    Bottom_2(in) = Time(bed_2_i+bed_i(in)-range_u-1);              % Find Time of max
+    bedPower_2(in) = 10*log10(bp);              % convert power to dB for plotting
+    end
     
     figure
     clf
@@ -324,19 +335,27 @@ if(file ~= "")
         hold on
         plot(slowtime,Surface_layer,'b')
         plot(slowtime,Bottom_layer,'-','color',rgb('dark gray'),'linewidth',1)
+        plot(slowtime,Bottom_2,'-','color',rgb('red'),'linewidth',1)
+        hold off
         colorbar
-        ylim([0 3]*1e-5)
+        ylim([0 6]*1e-5)
+        title('Radargram with bedpick')
     
     subplot(423)
-        plot(slowtime,bedPower)
+        plot(slowtime,bedPower,'color',rgb('light gray'))
         hold on
-        plot(slowtime,movmean(bedPower,15),'k--','linewidth',2)
+        plot(slowtime,bedPower_2,'color',rgb('light red'))
+        plot(slowtime,movmean(bedPower,15),'--','linewidth',2,'color',rgb('dark gray'))
+        plot(slowtime,movmean(bedPower_2,15),'--','linewidth',2,'color',rgb('dark red'))
+        title('Bed Echo Power')
     
     subplot(425)
-        plot(x_along(1,:),atten_combo(xx',yy'),'LineWidth', 3)
+        plot(slowtime,atten_combo(xx',yy'),'LineWidth', 3)
+        title('Expected Thermal Attenuation')
     
     subplot(427)
         plot(slowtime,Bottom_layer - Surface_layer)
+        title('Ice thickness along profile')
     
     
     subplot(222)
@@ -352,6 +371,7 @@ if(file ~= "")
         set(p, 'edgecolor', 'none');
         colorbar
         view(2)
+        title('Map view of transect with surface velocity')
     
     subplot(224)
         tempM = t_combo(xx',yy')'-273.15;
@@ -369,7 +389,7 @@ if(file ~= "")
         scatter(0,h_b_init(xx(1),yy(1))-100,100,'kp')
         colorbar;
         caxis([min(T_s(xx,yy))-273.15, 0])
-        title('Temp Profile Combo')
+        title('Modeled Temp Profile along transect with surface V overlay')
     
         drawnow
 end
