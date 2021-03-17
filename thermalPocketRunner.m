@@ -10,7 +10,7 @@ directoryNames = directoryNames(~contains(directoryNames,{'_Layers'}));
 cd ..
 
 %20,26 are good examples
-for i = [15,20,26]%1:length(directoryNames)
+for i = 1:length(directoryNames)
     file = "radarData_good/"+ erase(directoryNames{i}, [".mat"])
     thermalPockets;
     clearvars -except i directoryNames

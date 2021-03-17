@@ -315,16 +315,18 @@ if(file ~= "")
     slowtime = 1:numel(Bottom);
     bedPower = 10*log10(interp2(slowtime,Time,Data,slowtime,Bottom_layer));
     
-    range_u = 30;
-    range_d = 40;
+    range_u = 5;
+    range_d = 10;
     dt          = Time(2)-Time(1);
     bed_i       = floor(Bottom_layer/dt);
     Bottom_2    = zeros(size(Bottom_layer));
     bedPower_2  = zeros(size(Bottom_layer));
     for in = 1:numel(bed_i)
-    [bp,bed_2_i] = max(Data((bed_i(in)-range_u):(bed_i(in)+range_d) ,in)); % Find max in neighborhood
-    Bottom_2(in) = Time(bed_2_i+bed_i(in)-range_u-1);              % Find Time of max
-    bedPower_2(in) = 10*log10(bp);              % convert power to dB for plotting
+        if(~isnan(bed_i(in)) && bed_i(in) > range_u)
+            [bp,bed_2_i] = max(Data((bed_i(in)-range_u):(bed_i(in)+range_d) ,in)); % Find max in neighborhood
+            Bottom_2(in) = Time(bed_2_i+bed_i(in)-range_u-1);              % Find Time of max
+            bedPower_2(in) = 10*log10(bp);              % convert power to dB for plotting
+        end
     end
     
     figure
