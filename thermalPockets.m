@@ -176,11 +176,9 @@ h_init = griddedInterpolant(Xi,Yi,smoothsurf-smoothbed);
         
         % sigma(t)
         sig =@(t) sig_p .* exp(E_p./k_b.*(1./T_r - 1./t)); %Pure ice only for now
-        
-%         TODO make 2 way attenuation
 
         % Attenuation
-        c2a = 0.912e6; %conversion factor from sigma [S/m] to 1-way antenuation [dB/m], see Macgregor et al 2007 eq (10)
+        c2a = 2*0.912e6; %conversion factor from sigma [S/m] to 1-way antenuation [dB/m], see Macgregor et al 2007 eq (10)
         atten =@(x,y) (trapz(sig(t_z(x,y)).*c2a,2).*dz.*h_init(x,y)./1e3);
         
         % Attenuation
@@ -314,7 +312,9 @@ if(file ~= "")
     Surface_layer = layerData{1}.value{2}.data;
     Bottom_layer = layerData{2}.value{2}.data;
     
-    Data_rc = Data.*(abs(Time).^2*3e8); %Range correct
+    Data_rc = Data.*(2*4*pi*abs(Time).^2*3e8 /1.56); %Range correct
+    %Assume center frequency of 190Mhz, Lambda = 1.56 m. See MCoRDS
+    %Documentation
     
     slowtime = 1:numel(Bottom);
     bedPower = 10*log10(interp2(slowtime,Time,Data,slowtime,Bottom_layer,'nearest'));
@@ -359,81 +359,87 @@ if(file ~= "")
         plot(slowtime,movmean(bedPower_2,15),'--','linewidth',2,'color',rgb('dark red'))
         title('Bed Echo Power')
         ylabel('dB')
-%     f = figure;
-%     clf
-%     
-%     subplot(421)
-%         figure
-%         imagesc(slowtime,Time,10*log10(Data))
-%         hold on
-%         plot(slowtime,Surface_layer,'b')
-%         plot(slowtime,Bottom_layer,'-','color',rgb('dark gray'),'linewidth',1)
-%         plot(slowtime,Bottom_2,'-','color',rgb('red'),'linewidth',1)
-%         hold off
-%         colorbar
-%         ylim([0 6]*1e-5)
-%         title('Radargram with bedpick')
-%         c = colorbar;
-%         c.Label.String = 'Power [dB]';
-%     
-%     subplot(423)
-%         plot(slowtime,bedPower,'color',rgb('light gray'))
-%         hold on
-%         plot(slowtime,bedPower_2,'color',rgb('light red'))
-%         plot(slowtime,movmean(bedPower,15),'--','linewidth',2,'color',rgb('dark gray'))
-%         plot(slowtime,movmean(bedPower_2,15),'--','linewidth',2,'color',rgb('dark red'))
-%         title('Bed Echo Power')
-%         ylabel('dB')
-%     
-%     subplot(425)
-%         plot(slowtime,atten_combo(xx',yy'),'LineWidth', 3)
-%         title('Expected Attenuation')
-%         ylabel('dB')
-%     
-%     subplot(427)
+    
+    f = figure(3);
+    clf
+    
+    subplot(421)
+        imagesc(slowtime,Time,10*log10(Data))
+        hold on
+        plot(slowtime,Surface_layer,'b')
+        plot(slowtime,Bottom_layer,'-','color',rgb('dark gray'),'linewidth',1)
+        plot(slowtime,Bottom_2,'-','color',rgb('red'),'linewidth',1)
+        hold off
+        colorbar
+        ylim([0 6]*1e-5)
+        title('Radargram with bedpick')
+        c = colorbar;
+        c.Label.String = 'Power [dB]';
+    
+    subplot(423)
+        plot(slowtime,bedPower,'color',rgb('light gray'))
+        hold on
+        plot(slowtime,bedPower_2,'color',rgb('light red'))
+        plot(slowtime,movmean(bedPower,15),'--','linewidth',2,'color',rgb('dark gray'))
+        plot(slowtime,movmean(bedPower_2,15),'--','linewidth',2,'color',rgb('dark red'))
+        title('Bed Echo Power')
+        ylabel('dB')
+    
+    subplot(425)
+        plot(slowtime,atten_combo(xx',yy'),'LineWidth', 3)
+        title('Expected Attenuation')
+        ylabel('dB')
+    
+    subplot(427)
 %         plot(slowtime,Bottom_layer - Surface_layer)
 %         title('Ice thickness along profile')
-%     
-%     
-%     subplot(222)
-%         p = surf(reshape(xy(:,1),size(Xi)),reshape(xy(:,2),size(Xi)),zeros(size(spd')),spd');
-%         hold on
-%         plot(xx,yy,'r*-','linewidth',2)
-%         scatter(xx(1),yy(1),100,'kp')
-%         contour(xi,yi,spd, [10, 10] , 'k:','HandleVisibility','off')
-%         contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off')
-%         contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
-%         contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
-%         % title('Temp Avg')
-%         set(p, 'edgecolor', 'none');
-%         c = colorbar;
-%         c.Label.String = 'Surface Velocity [m/yr]';
-%         view(2)
-%         mapzoomps('sw')
-%         title('Map view of transect')
-%     
-%     subplot(224)
-%         tempM = t_combo(xx',yy')'-273.15;
-%         height = zeros(size(tempM));
-%         x_along = zeros(size(tempM));
-%         for i = 1:length(xx)
-%             height(:,i) = h_b_init(xx(i),yy(i)) + (0:dz:1)'*h_init(xx(i),yy(i));
-%             x_along(:,i) = sqrt((xx(1) - xx(i))^2 + (yy(1) - yy(i))^2);
-%         end   
-%         p = surf(x_along, height, tempM);
-%         set(p, 'edgecolor', 'none');
-%         view(2)
-%         hold on
-% %         plot(x_along(1,:),measures_interp('speed',xx,yy),'LineWidth', 3)
-%         scatter(0,h_b_init(xx(1),yy(1))-100,100,'kp')
-%         c = colorbar;
-%         c.Label.String = 'Temp [C]';
-%         caxis([min(T_s(xx,yy))-273.15, 0])
-%         title('Modeled Temp Profile')
-%         sgtitle(erase(file, "radarData_good/"),'Interpreter','none');
-%         drawnow
-%         
-%     if(savefig)
-%         savePng("figs2/" + erase(file, ["radarData_good/","Data_"]))
-%     end
+        plot(slowtime,atten_robin(xx',yy'),'LineWidth', 2,'color',rgb('Royal Blue'))
+        hold on
+        plot(slowtime, movmean(bedPower,15) + atten_robin(xx',yy')','linewidth',2,'color',rgb('Yellow Orange'))
+        plot(slowtime, movmean(bedPower,15),'--','linewidth',2,'color',rgb('dark gray'))
+        title('Expected Attenuation Robin Correction')
+        ylabel('dB')
+    
+    
+    subplot(222)
+        p = surf(reshape(xy(:,1),size(Xi)),reshape(xy(:,2),size(Xi)),zeros(size(spd')),spd');
+        hold on
+        plot(xx,yy,'r*-','linewidth',2)
+        scatter(xx(1),yy(1),100,'kp')
+        contour(xi,yi,spd, [10, 10] , 'k:','HandleVisibility','off')
+        contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off')
+        contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
+        contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
+        % title('Temp Avg')
+        set(p, 'edgecolor', 'none');
+        c = colorbar;
+        c.Label.String = 'Surface Velocity [m/yr]';
+        view(2)
+        mapzoomps('sw')
+        title('Map view of transect')
+    
+    subplot(224)
+        tempM = t_combo(xx',yy')'-273.15;
+        height = zeros(size(tempM));
+        x_along = zeros(size(tempM));
+        for i = 1:length(xx)
+            height(:,i) = h_b_init(xx(i),yy(i)) + (0:dz:1)'*h_init(xx(i),yy(i));
+            x_along(:,i) = sqrt((xx(1) - xx(i))^2 + (yy(1) - yy(i))^2);
+        end   
+        p = surf(x_along, height, tempM);
+        set(p, 'edgecolor', 'none');
+        view(2)
+        hold on
+%         plot(x_along(1,:),measures_interp('speed',xx,yy),'LineWidth', 3)
+        scatter(0,h_b_init(xx(1),yy(1))-100,100,'kp')
+        c = colorbar;
+        c.Label.String = 'Temp [C]';
+        caxis([min(T_s(xx,yy))-273.15, 0])
+        title('Modeled Temp Profile')
+        sgtitle(erase(file, "radarData_good/"),'Interpreter','none');
+        drawnow
+        
+    if(savefig)
+        savePng("figs2/" + erase(file, ["radarData_good/","Data_"]))
+    end
 end
