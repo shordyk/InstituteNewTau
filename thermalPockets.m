@@ -1,10 +1,10 @@
 % clear
 % clc
 % close all
+savefig = false;
 
 addpath('lib') 
-
-
+file = "radarData_good/Data_20181111_01_003"
 %For files must download layer data and data (mvdr) from https://data.cresis.ku.edu/data/rds/
 % file = "";
 % %Institute
@@ -177,12 +177,14 @@ h_init = griddedInterpolant(Xi,Yi,smoothsurf-smoothbed);
         % sigma(t)
         sig =@(t) sig_p .* exp(E_p./k_b.*(1./T_r - 1./t)); %Pure ice only for now
         
+%         TODO make 2 way attenuation
+
         % Attenuation
-        c2a = 0.912e6; %conversion factor from sigma [S/m] to antenuation [dB/m], see Macgregor et al 2007 eq (10)
+        c2a = 0.912e6; %conversion factor from sigma [S/m] to 1-way antenuation [dB/m], see Macgregor et al 2007 eq (10)
         atten =@(x,y) (trapz(sig(t_z(x,y)).*c2a,2).*dz.*h_init(x,y)./1e3);
         
         % Attenuation
-        c2a = 0.912e6; %conversion factor from sigma [S/m] to antenuation [dB/m], see Macgregor et al 2007 eq (10)
+        c2a = 0.912e6; %conversion factor from sigma [S/m] to 1-way antenuation [dB/m], see Macgregor et al 2007 eq (10)
         atten_robin =@(x,y) (trapz(sig(t_robin(x,y)).*c2a,2).*dz.*h_init(x,y)./1e3);
         
         % Combo Temp
@@ -311,29 +313,31 @@ end
 if(file ~= "")
     Surface_layer = layerData{1}.value{2}.data;
     Bottom_layer = layerData{2}.value{2}.data;
- 
-    slowtime = 1:numel(Bottom);
-    bedPower = 10*log10(interp2(slowtime,Time,Data,slowtime,Bottom_layer));
     
-    range_u = 5;
-    range_d = 10;
+    Data_rc = Data.*(abs(Time).^2*3e8); %Range correct
+    
+    slowtime = 1:numel(Bottom);
+    bedPower = 10*log10(interp2(slowtime,Time,Data,slowtime,Bottom_layer,'nearest'));
+    bedPower_rc = 10*log10(interp2(slowtime,Time,Data_rc,slowtime,Bottom_layer,'nearest'));
+    
+    range_u = 4;
+    range_d = 8;
     dt          = Time(2)-Time(1);
     bed_i       = floor(Bottom_layer/dt);
     Bottom_2    = zeros(size(Bottom_layer));
     bedPower_2  = zeros(size(Bottom_layer));
     for in = 1:numel(bed_i)
-        if(~isnan(bed_i(in)) && bed_i(in) > range_u)
-            [bp,bed_2_i] = max(Data((bed_i(in)-range_u):(bed_i(in)+range_d) ,in)); % Find max in neighborhood
+        if(~isnan(bed_i(in)) && bed_i(in) ~= Inf && bed_i(in) > range_u)
+            [bp,bed_2_i] = max(Data_rc(min((bed_i(in)-range_u),size(Data,1)-1):min((bed_i(in)+range_d),size(Data,1)) ,in)); % Find max in neighborhood
             Bottom_2(in) = Time(bed_2_i+bed_i(in)-range_u-1);              % Find Time of max
             bedPower_2(in) = 10*log10(bp);              % convert power to dB for plotting
         end
     end
     
-    figure
-    clf
     
-    subplot(421)
-        imagesc(slowtime,Time,10*log10(Data))
+     figure(1)
+     clf
+        imagesc(slowtime,Time,10*log10(Data_rc))
         hold on
         plot(slowtime,Surface_layer,'b')
         plot(slowtime,Bottom_layer,'-','color',rgb('dark gray'),'linewidth',1)
@@ -342,56 +346,94 @@ if(file ~= "")
         colorbar
         ylim([0 6]*1e-5)
         title('Radargram with bedpick')
+        c = colorbar;
+        c.Label.String = 'Power [dB]';
     
-    subplot(423)
-        plot(slowtime,bedPower,'color',rgb('light gray'))
+    figure(2)
+    clf
+        plot(slowtime,bedPower_rc,'color',rgb('light gray'))
         hold on
+        plot(slowtime,movmean(bedPower,15),'linewidth',1.5,'color',rgb('light blue'))
         plot(slowtime,bedPower_2,'color',rgb('light red'))
-        plot(slowtime,movmean(bedPower,15),'--','linewidth',2,'color',rgb('dark gray'))
+        plot(slowtime,movmean(bedPower_rc,15),'--','linewidth',2,'color',rgb('dark gray'))
         plot(slowtime,movmean(bedPower_2,15),'--','linewidth',2,'color',rgb('dark red'))
         title('Bed Echo Power')
-    
-    subplot(425)
-        plot(slowtime,atten_combo(xx',yy'),'LineWidth', 3)
-        title('Expected Thermal Attenuation')
-    
-    subplot(427)
-        plot(slowtime,Bottom_layer - Surface_layer)
-        title('Ice thickness along profile')
-    
-    
-    subplot(222)
-        p = surf(reshape(xy(:,1),size(Xi)),reshape(xy(:,2),size(Xi)),zeros(size(spd')),spd');
-        hold on
-        plot(xx,yy,'r*-','linewidth',2)
-        scatter(xx(1),yy(1),100,'kp')
-        contour(xi,yi,spd, [10, 10] , 'k:','HandleVisibility','off')
-        contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off')
-        contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
-        contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
-        % title('Temp Avg')
-        set(p, 'edgecolor', 'none');
-        colorbar
-        view(2)
-        title('Map view of transect with surface velocity')
-    
-    subplot(224)
-        tempM = t_combo(xx',yy')'-273.15;
-        height = zeros(size(tempM));
-        x_along = zeros(size(tempM));
-        for i = 1:length(xx)
-            height(:,i) = h_b_init(xx(i),yy(i)) + (0:dz:1)'*h_init(xx(i),yy(i));
-            x_along(:,i) = sqrt((xx(1) - xx(i))^2 + (yy(1) - yy(i))^2);
-        end   
-        p = surf(x_along, height, tempM);
-        set(p, 'edgecolor', 'none');
-        view(2)
-        hold on
-        plot(x_along(1,:),measures_interp('speed',xx,yy),'LineWidth', 3)
-        scatter(0,h_b_init(xx(1),yy(1))-100,100,'kp')
-        colorbar;
-        caxis([min(T_s(xx,yy))-273.15, 0])
-        title('Modeled Temp Profile along transect with surface V overlay')
-    
-        drawnow
+        ylabel('dB')
+%     f = figure;
+%     clf
+%     
+%     subplot(421)
+%         figure
+%         imagesc(slowtime,Time,10*log10(Data))
+%         hold on
+%         plot(slowtime,Surface_layer,'b')
+%         plot(slowtime,Bottom_layer,'-','color',rgb('dark gray'),'linewidth',1)
+%         plot(slowtime,Bottom_2,'-','color',rgb('red'),'linewidth',1)
+%         hold off
+%         colorbar
+%         ylim([0 6]*1e-5)
+%         title('Radargram with bedpick')
+%         c = colorbar;
+%         c.Label.String = 'Power [dB]';
+%     
+%     subplot(423)
+%         plot(slowtime,bedPower,'color',rgb('light gray'))
+%         hold on
+%         plot(slowtime,bedPower_2,'color',rgb('light red'))
+%         plot(slowtime,movmean(bedPower,15),'--','linewidth',2,'color',rgb('dark gray'))
+%         plot(slowtime,movmean(bedPower_2,15),'--','linewidth',2,'color',rgb('dark red'))
+%         title('Bed Echo Power')
+%         ylabel('dB')
+%     
+%     subplot(425)
+%         plot(slowtime,atten_combo(xx',yy'),'LineWidth', 3)
+%         title('Expected Attenuation')
+%         ylabel('dB')
+%     
+%     subplot(427)
+%         plot(slowtime,Bottom_layer - Surface_layer)
+%         title('Ice thickness along profile')
+%     
+%     
+%     subplot(222)
+%         p = surf(reshape(xy(:,1),size(Xi)),reshape(xy(:,2),size(Xi)),zeros(size(spd')),spd');
+%         hold on
+%         plot(xx,yy,'r*-','linewidth',2)
+%         scatter(xx(1),yy(1),100,'kp')
+%         contour(xi,yi,spd, [10, 10] , 'k:','HandleVisibility','off')
+%         contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off')
+%         contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
+%         contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
+%         % title('Temp Avg')
+%         set(p, 'edgecolor', 'none');
+%         c = colorbar;
+%         c.Label.String = 'Surface Velocity [m/yr]';
+%         view(2)
+%         mapzoomps('sw')
+%         title('Map view of transect')
+%     
+%     subplot(224)
+%         tempM = t_combo(xx',yy')'-273.15;
+%         height = zeros(size(tempM));
+%         x_along = zeros(size(tempM));
+%         for i = 1:length(xx)
+%             height(:,i) = h_b_init(xx(i),yy(i)) + (0:dz:1)'*h_init(xx(i),yy(i));
+%             x_along(:,i) = sqrt((xx(1) - xx(i))^2 + (yy(1) - yy(i))^2);
+%         end   
+%         p = surf(x_along, height, tempM);
+%         set(p, 'edgecolor', 'none');
+%         view(2)
+%         hold on
+% %         plot(x_along(1,:),measures_interp('speed',xx,yy),'LineWidth', 3)
+%         scatter(0,h_b_init(xx(1),yy(1))-100,100,'kp')
+%         c = colorbar;
+%         c.Label.String = 'Temp [C]';
+%         caxis([min(T_s(xx,yy))-273.15, 0])
+%         title('Modeled Temp Profile')
+%         sgtitle(erase(file, "radarData_good/"),'Interpreter','none');
+%         drawnow
+%         
+%     if(savefig)
+%         savePng("figs2/" + erase(file, ["radarData_good/","Data_"]))
+%     end
 end
