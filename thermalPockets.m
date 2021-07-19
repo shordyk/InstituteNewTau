@@ -1,10 +1,17 @@
 % clear
 % clc
 % close all
-savefig = false;
+% savefig = false;
+% file = "radarData_good/Data_20131126_01_029" %siple coast 1 SM
+% file = "radarData_good/Data_20131126_01_031" %siple coast 2 SM
+% file = "radarData_good/Data_20121023_04_040" %smith glacier
+% file = "radarData_good/Data_20121016_03_002" %Pine Island upstream 2 SM
+% file = "radarData_good/Data_20121102_03_006" %Recovery area, lost bed
+
+% unComment above to run alone, comment out if run by thermalPocketRunner.m
 
 addpath('lib') 
-file = "radarData_good/Data_20181111_01_003"
+
 %For files must download layer data and data (mvdr) from https://data.cresis.ku.edu/data/rds/
 % file = "";
 % %Institute
@@ -178,18 +185,18 @@ h_init = griddedInterpolant(Xi,Yi,smoothsurf-smoothbed);
         sig =@(t) sig_p .* exp(E_p./k_b.*(1./T_r - 1./t)); %Pure ice only for now
 
         % Attenuation
-        c2a = 2*0.912e6; %conversion factor from sigma [S/m] to 1-way antenuation [dB/m], see Macgregor et al 2007 eq (10)
+        c2a = 2 * 0.912e6; %conversion factor from sigma [S/m] to 2-way antenuation [dB/m], see Macgregor et al 2007 eq (10)
         atten =@(x,y) (trapz(sig(t_z(x,y)).*c2a,2).*dz.*h_init(x,y)./1e3);
         
         % Attenuation
-        c2a = 0.912e6; %conversion factor from sigma [S/m] to 1-way antenuation [dB/m], see Macgregor et al 2007 eq (10)
+        c2a = 2 * 0.912e6; %conversion factor from sigma [S/m] to 2-way antenuation [dB/m], see Macgregor et al 2007 eq (10)
         atten_robin =@(x,y) (trapz(sig(t_robin(x,y)).*c2a,2).*dz.*h_init(x,y)./1e3);
         
         % Combo Temp
         t_combo =@(x,y) max(t_robin(x,y),t_z(x,y));
         
         % Combo Attenuation
-        c2a = 0.912e6; %conversion factor from sigma [S/m] to antenuation [dB/m], see Macgregor et al 2007 eq (10)
+        c2a = 2 * 0.912e6; %conversion factor from sigma [S/m] to 2-way antenuation [dB/m], see Macgregor et al 2007 eq (10)
         atten_combo =@(x,y) (trapz(sig(t_combo(x,y)).*c2a,2).*dz.*h_init(x,y)./1e3);
         
         % Enhancement Factor []
@@ -312,18 +319,18 @@ if(file ~= "")
     Surface_layer = layerData{1}.value{2}.data;
     Bottom_layer = layerData{2}.value{2}.data;
     
-    Data_rc = Data.*(2*4*pi*abs(Time).^2*3e8 /1.56); %Range correct
+    Data_rc = Data.*(2*4*pi*abs(Time*3e8).^2 /1.56); %Range correct
     %Assume center frequency of 190Mhz, Lambda = 1.56 m. See MCoRDS
     %Documentation
     
     slowtime = 1:numel(Bottom);
-    bedPower = 10*log10(interp2(slowtime,Time,Data,slowtime,Bottom_layer,'nearest'));
+    bedPower = 10*log10(interp2(slowtime,Time,Data_rc,slowtime,Bottom_layer,'nearest'));
     bedPower_rc = 10*log10(interp2(slowtime,Time,Data_rc,slowtime,Bottom_layer,'nearest'));
     
     range_u = 4;
     range_d = 8;
     dt          = Time(2)-Time(1);
-    bed_i       = floor(Bottom_layer/dt);
+    bed_i       = floor((Bottom_layer-Time(1))/dt) + 1;
     Bottom_2    = zeros(size(Bottom_layer));
     bedPower_2  = zeros(size(Bottom_layer));
     for in = 1:numel(bed_i)
@@ -334,33 +341,33 @@ if(file ~= "")
         end
     end
     
+%     
+%      figure(1)
+%      clf
+%         imagesc(slowtime,Time,10*log10(Data_rc))
+%         hold on
+%         plot(slowtime,Surface_layer,'b')
+%         plot(slowtime,Bottom_layer,'-','color',rgb('dark gray'),'linewidth',1)
+%         plot(slowtime,Bottom_2,'-','color',rgb('red'),'linewidth',1)
+%         hold off
+%         colorbar
+%         ylim([0 6]*1e-5)
+%         title('Radargram with bedpick')
+%         c = colorbar;
+%         c.Label.String = 'Power [dB]';
+%     
+%     figure(2)
+%     clf
+%         plot(slowtime,bedPower_rc,'color',rgb('light gray'))
+%         hold on
+%         plot(slowtime,movmean(bedPower,15),'linewidth',1.5,'color',rgb('light blue'))
+%         plot(slowtime,bedPower_2,'color',rgb('light red'))
+%         plot(slowtime,movmean(bedPower_rc,15),'--','linewidth',2,'color',rgb('dark gray'))
+%         plot(slowtime,movmean(bedPower_2,15),'--','linewidth',2,'color',rgb('dark red'))
+%         title('Bed Echo Power')
+%         ylabel('dB')
     
-     figure(1)
-     clf
-        imagesc(slowtime,Time,10*log10(Data_rc))
-        hold on
-        plot(slowtime,Surface_layer,'b')
-        plot(slowtime,Bottom_layer,'-','color',rgb('dark gray'),'linewidth',1)
-        plot(slowtime,Bottom_2,'-','color',rgb('red'),'linewidth',1)
-        hold off
-        colorbar
-        ylim([0 6]*1e-5)
-        title('Radargram with bedpick')
-        c = colorbar;
-        c.Label.String = 'Power [dB]';
-    
-    figure(2)
-    clf
-        plot(slowtime,bedPower_rc,'color',rgb('light gray'))
-        hold on
-        plot(slowtime,movmean(bedPower,15),'linewidth',1.5,'color',rgb('light blue'))
-        plot(slowtime,bedPower_2,'color',rgb('light red'))
-        plot(slowtime,movmean(bedPower_rc,15),'--','linewidth',2,'color',rgb('dark gray'))
-        plot(slowtime,movmean(bedPower_2,15),'--','linewidth',2,'color',rgb('dark red'))
-        title('Bed Echo Power')
-        ylabel('dB')
-    
-    f = figure(3);
+    f = figure;
     clf
     
     subplot(421)
@@ -371,7 +378,7 @@ if(file ~= "")
         plot(slowtime,Bottom_2,'-','color',rgb('red'),'linewidth',1)
         hold off
         colorbar
-        ylim([0 6]*1e-5)
+        ylim([min(Surface_layer) - 5e-6, max(Bottom_layer)+1e-5])
         title('Radargram with bedpick')
         c = colorbar;
         c.Label.String = 'Power [dB]';
@@ -380,24 +387,28 @@ if(file ~= "")
         plot(slowtime,bedPower,'color',rgb('light gray'))
         hold on
         plot(slowtime,bedPower_2,'color',rgb('light red'))
-        plot(slowtime,movmean(bedPower,15),'--','linewidth',2,'color',rgb('dark gray'))
-        plot(slowtime,movmean(bedPower_2,15),'--','linewidth',2,'color',rgb('dark red'))
-        title('Bed Echo Power')
+        plot(slowtime,movmean(bedPower,15),'--','linewidth',2,'color',rgb('dark gray'),'HandleVisibility','off')
+        plot(slowtime,movmean(bedPower_2,15),'--','linewidth',2,'color',rgb('dark red'),'HandleVisibility','off')
+        title('Range Corrected Bed Power')
+%         legend('Pub Bed Pick','Paul Pick')
         ylabel('dB')
     
     subplot(425)
-        plot(slowtime,atten_combo(xx',yy'),'LineWidth', 3)
+        plot(slowtime,atten_combo(xx',yy'),'LineWidth', 3,'color',rgb('ocean blue'))
         title('Expected Attenuation')
         ylabel('dB')
     
     subplot(427)
 %         plot(slowtime,Bottom_layer - Surface_layer)
 %         title('Ice thickness along profile')
-        plot(slowtime,atten_robin(xx',yy'),'LineWidth', 2,'color',rgb('Royal Blue'))
+        correct_bd = bedPower_2 + atten_robin(xx',yy')';
+        plot(slowtime, correct_bd,'linewidth',1,'color',rgb('red'))
         hold on
-        plot(slowtime, movmean(bedPower,15) + atten_robin(xx',yy')','linewidth',2,'color',rgb('Yellow Orange'))
-        plot(slowtime, movmean(bedPower,15),'--','linewidth',2,'color',rgb('dark gray'))
-        title('Expected Attenuation Robin Correction')
+        plot(slowtime([1,end]),[mean(correct_bd),mean(correct_bd)],'-','linewidth',1,'color',rgb('Yellow Orange'))
+        plot(slowtime([1,end]),[mean(correct_bd)+std(correct_bd),mean(correct_bd)+std(correct_bd)],'--','linewidth',1.5,'color',rgb('Yellow Orange'))
+        plot(slowtime([1,end]),[mean(correct_bd)-std(correct_bd),mean(correct_bd)-std(correct_bd)],'--','linewidth',1.5,'color',rgb('Yellow Orange'))
+        plot(slowtime,movmean(correct_bd - (atten_combo(xx',yy')' - atten_robin(xx',yy')'),15),'--','linewidth',1.5,'color',rgb('ocean blue'))
+        title('Signal with w/ Robin Correction')
         ylabel('dB')
     
     
@@ -440,6 +451,6 @@ if(file ~= "")
         drawnow
         
     if(savefig)
-        savePng("figs2/" + erase(file, ["radarData_good/","Data_"]))
+        savePng("figs2/GeoCorrected" + erase(file, ["radarData_good/","Data_"]))
     end
 end
