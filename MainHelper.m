@@ -15,10 +15,10 @@ clear
 close all
 clc
 
-addpath('lib','lib/tricontour') 
+addpath('lib') 
 
-% Name of scenarios to run, only 1 map file use here.
-nameToRun = ["Case 1"];
+% Name of scenarios to run, only 1 map file used here.
+nameToRun = ["ISSM_Linear"];
 mapsToRun = ["gridInstitute5000.mat"];
 
 for j = 1:length(mapsToRun)

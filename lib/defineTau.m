@@ -114,6 +114,28 @@ function [tau_c] = defineTau(str,h_s_init,h_b_init,phi_init,phi_max,phi_min,x0)
     tau_c = @(x,y,u,v) norms([u,v],2,2)... 
         .*((scale.*(1-(phi_init(x,y)-phi_min)/(phi_max-phi_min)) + base).* (1-heaviside(-cutoff + h_b_init(x,y))) +...;
         + rock_hi*heaviside(-cutoff + h_b_init(x,y)));
+    elseif(str == "ISSM")  % also from https://tc.copernicus.org/articles/13/1441/2019/tc-13-1441-2019.html
+%     load("ISSM/x2dThwaites.mat",'x2dThwaites','y2dThwaites','BasalDragThwaites');
+%     uB = scatteredInterpolant(x2dThwaites,y2dThwaites,BasalDragThwaites,'linear','linear');
+    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
+    uB = griddedInterpolant(xx,yy,tau(:,:,21));
+    
+    tau_c = @(x,y,u,v,grounded) norms([u,v],2,2).*... %Plastic
+        subplus(uB(x,y))*1;
+    elseif(str == "ISSM_Linear")  % also from https://tc.copernicus.org/articles/13/1441/2019/tc-13-1441-2019.html
+%     load("ISSM/x2dThwaites.mat",'x2dThwaites','y2dThwaites','BasalDragThwaites');
+%     uB = scatteredInterpolant(x2dThwaites,y2dThwaites,BasalDragThwaites,'linear','linear');
+    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
+    uB = griddedInterpolant(xx,yy,tau(:,:,21).*3.154e7./(measures_interp('speed',xx,yy)));
+    
+    tau_c = @(x,y,u,v,grounded) pow_pos(norms([u,v],2,2),2) .*... %Plastic
+        subplus(uB(x,y))*1;
     else
         error("Invalid Tau_c Scenario String")
     end

@@ -24,7 +24,7 @@ K     = 2.1;                % thermal conductivity of ice [W/m/K]
 A_m   = 2.4e-24;            % Meyer's prefactor [Pa^-3 s^-1]
 T_m   = 273;                % Ice melting point [k] 
 enhance = ones(nE,1);       % Thermal enhancement factor [ ]
-E_man = (1/6)^(-1/3);       % Manual Adjustment to thermocoupling enhancement
+E_man = 1; %(1/6)^(-1/3);       % Manual Adjustment to thermocoupling enhancement
 
 % initialize to zero velocity case [m/s] 
 u = zeros(size(xy(:,1))); 

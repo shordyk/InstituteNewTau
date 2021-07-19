@@ -8,7 +8,7 @@ figure(1);
             axis equal
             xlabel('X')
             ylabel('Y')
-            caxis([1 3.6]);
+            caxis(log10([0.3323  381.5379]));
             colorbar
         subplot(132)
             trisurf(t_c,xy_c(:,1),xy_c(:,2),enhance.^(-nn),...

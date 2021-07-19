@@ -39,7 +39,7 @@ for t_i = 1:100
     % Thermocouple fields to update everyloop
     % Strain rate [s^-1]
         ep_dot = calcTrigridStrain(u,v,xy,dx); %returns intperolation object
-        lambda  = calcAdvection(T,u,v,xy,dx/4,rho,C_p); %TODO better derivatives, analytic?
+        lambda  = calcAdvection(T,u,v,xy,dx,rho,C_p); %TODO better derivatives, analytic?
 
         % Brinkman number [ ]
         Br =@(x,y) 2*subplus(h_s_init(x,y)-h_b_init(x,y)).^2./(K*(T_m-T_s(x,y))).*((subplus(ep_dot(x,y)).^(nn+1))/A_m).^(1/nn);
@@ -111,7 +111,7 @@ for t_i = 1:100
     % u and v are [m/s]    
     %% Visualization in loop 
     %(uncomment to see avg temp, enhancement, and Pe, Lambda, Br every loop
-%     inLoopPlotting;
+    inLoopPlotting;
 end
 %% Save data to data file
 mpClean = erase(mapFile, [".mat","workingGrid_"]);
@@ -125,25 +125,29 @@ clf
 sgtitle(str);
 subplot(141)
 
-trisurf(t,xy(:,1),xy(:,2),zeros(size(spd2)),log10(spd2),...
+trisurf(t,xy(:,1),xy(:,2),zeros(size(spd2)),(spd2),...
        'edgecolor','none')
 hold on
 title('Speed of Measures')
 xlabel('X')
 ylabel('Y')
-caxis([1 2.6]);
+f = gca;
+f.ColorScale = 'log';
+view(2)
 colorbar
 view(2)
 axis equal
 
 subplot(142)
-trisurf(t,xy(:,1),xy(:,2),h_s_init(xy(:,1),xy(:,2)),log10(sqrt(u.^2 + v.^2)*3.154E7),...
-       'edgecolor','none')
-caxis([1 2.6]);   
+trisurf(t,xy(:,1),xy(:,2),h_s_init(xy(:,1),xy(:,2)),(sqrt(u.^2 + v.^2)*3.154E7),...
+       'edgecolor','none')   
+caxis([0.3323  381.5379])
 title('Speed')
 xlabel('X')
 ylabel('Y')
 colorbar
+f = gca;
+f.ColorScale = 'log';
 view(2)
 axis equal
 
@@ -154,7 +158,7 @@ hold on
 trisurf(t,xy(:,1),xy(:,2),h_b_init(xy(:,1),xy(:,2)),...
        'edgecolor','black','facecolor','none')
 colorbar
-caxis([50e3 150e3]);
+% caxis([50e3 150e3]);
 colormap(gca, Cmap/255.0)
 title('Basal \tau')
 xlabel('X')
@@ -169,7 +173,7 @@ title('Driving force')
 xlabel('X')
 ylabel('Y')
 colorbar
-caxis([0e3 150e3]);
+% caxis([0e3 150e3]);
 colormap(gca, Cmap/255.0)
 view(2)
 axis equal
