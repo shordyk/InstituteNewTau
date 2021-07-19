@@ -39,7 +39,13 @@ for t_i = 1:100
     % Thermocouple fields to update everyloop
     % Strain rate [s^-1]
         ep_dot = calcTrigridStrain(u,v,xy,dx); %returns intperolation object
-        lambda  = calcAdvection(T,u,v,xy,dx,rho,C_p); %TODO better derivatives, analytic?
+        
+        if(t_i == 1)
+            T_calc = T;
+        else
+            T_calc = T_bar(xy(:,1),xy(:,2));
+        end
+        lambda  = calcAdvection(T_calc,u,v,xy,dx,rho,C_p); 
 
         % Brinkman number [ ]
         Br =@(x,y) 2*subplus(h_s_init(x,y)-h_b_init(x,y)).^2./(K*(T_m-T_s(x,y))).*((subplus(ep_dot(x,y)).^(nn+1))/A_m).^(1/nn);

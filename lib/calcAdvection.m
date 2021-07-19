@@ -27,6 +27,6 @@ function [lambda] = calcAdvection(T,u,v,xy,dx,rho_i,C_p)
     [Tx, Ty] = gradient(Tg,dx,dx);
     lam = rho_i*C_p*(Tx.*ug + Ty.*vg)./2; 
     % Divide by 2 assumes bed is temperate, and so the depth integrated
-    % temperature gradient is 1/2 that of the surface temp gradient.
+    % temperature gradient is 1/2 that of temp gradient.
     lambda = griddedInterpolant(Xi,Yi,lam,'linear','nearest');
     
