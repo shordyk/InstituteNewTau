@@ -72,6 +72,11 @@ h_re = subplus(h_real(xy(:,1),xy(:,2))); % non-smoothed ice thickness [m]
 phi_max = max(max(phi_init(xy(:,1),xy(:,2))));
 phi_min = min(min(phi_init(xy(:,1),xy(:,2))));
 
+%% Mask Between rock/sed (0 is rock, 1 is sed)
+
+rockSed = double(Yi > -(Xi + 4.5e5)/1.7); %divide between rock/sed midstream
+rockSedMask = griddedInterpolant(Xi',Yi',rockSed','linear');   
+
 %% Create vectors of bed/surface for numerical solving
 h_s = h_s_init(xy(:,1),xy(:,2));
 h_b = h_b_init(xy(:,1),xy(:,2));

@@ -28,7 +28,7 @@ initializeModel();
 
 %% Define \tau
 % Define map of basal strength according to named scenario. 
-tau_c = defineTau(str,h_s_init,h_b_init,phi_init,phi_max,phi_min);
+tau_c = defineTau(str,rockSedMask);
 
 %% Build System
 buildSystem();
@@ -40,7 +40,7 @@ for t_i = 1:100
     % Strain rate [s^-1]
         ep_dot = calcTrigridStrain(u,v,xy,dx); %returns intperolation object
         
-        if(t_i == 1)
+        if(true)
             T_calc = T;
         else
             T_calc = T_bar(xy(:,1),xy(:,2));
@@ -98,7 +98,7 @@ for t_i = 1:100
     % CVX may throw a warning about non-empty problems here, that is OK.
     cvx_begin quiet
         variables u(nN) v(nN)
-        obj = 2.*a./p.*sum(E_man*enhance.*h_av.*tau_area.*pow_pos(norms([A*u,B*v,1/2*(B*u+A*v)],2,2),p)) + ...
+        obj = 2.*a./p.*sum(enhance.*h_av.*tau_area.*pow_pos(norms([A*u,B*v,1/2*(B*u+A*v)],2,2),p)) + ...
               F*tau_c(xy(:,1),xy(:,2),u,v) + ...
               rho*g*sum(h_av.*((A*h_s).*(D*u) + (B*h_s).*(D*v)));
         subject to
@@ -183,3 +183,11 @@ colorbar
 colormap(gca, Cmap/255.0)
 view(2)
 axis equal
+
+
+[um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
+figure
+trisurf(t,xy(:,1),xy(:,2),tau_c(xy(:,1),xy(:,2),um,vm)./norms([um,vm],2,2),...
+       'edgecolor','none')
+view(2)
+colorbar

@@ -4,7 +4,7 @@ clear
 close all
 
 if(true) %gate to actually make a new grid
-    dx = 5e3;    %dx: nominal grid spacing [m]
+    dx = 4e3;    %dx: nominal grid spacing [m]
 
     xmax = -8.75e5;
     xmin = -9.75e5;
@@ -17,27 +17,8 @@ if(true) %gate to actually make a new grid
     theta = pi/3; %[rad] angle of rotation
     % Mesh Generation
     clf
-    %exclude mountains
-    ex1_cx = -1.41e6;
-    ex1_cy = -5.65e5;
-    ex1_x = -1.5e6:dx/2:xmax;
-    ex1_y = sqrt((3.0e4)^2-(ex1_x-ex1_cx).^2)+ex1_cy-1e4;
-    ex1_y_clean = ex1_y(ex1_y > ymin);
-    ex1_x_clean = ex1_x(ex1_y > ymin);
-
-
-    ex2_cx = -1.52e6;
-    ex2_cy = -5.65e5;
-    ex2_x = xmin:dx/2:-1.48e6;
-    ex2_y = sqrt((4e4)^2-(ex2_x-ex2_cx).^2)+ex2_cy-1.5e4;
-    ex2_y_clean = ex2_y(ex2_y > ymin);
-    ex2_x_clean = ex2_x(ex2_y > ymin);
-%     pv = [xmin,ymax;ex2_x_clean',ex2_y_clean';ex1_x_clean',ex1_y_clean';xmax,ymin;xmax,ymax;xmin,ymax];
-    
-%     pv = [xmin,ymax;xmin,ymin;ex2_x_clean',ex2_y_clean';ex1_x_clean',ex1_y_clean';xmax,ymax];
     pv = [xmin,ymax;xmin,ymin;xmax,ymin;xmax,ymax];
-%     pv = [xmin,ymax;xmin,ymin;ex1_x_clean',ex1_y_clean';xmax,ymax];
-    pv = makePerimeter(pv,dx);
+    pv = makePerimeter(pv,dx); %Places points on the perimeter for distMesh to use
     figure(2)
     [xy,t] = distmesh2d(@dpoly,@huniform,dx/1e5,[xmin,ymin;xmax,ymax]/1e5,pv/1e5,pv/1e5);
     % scale to real grid size
