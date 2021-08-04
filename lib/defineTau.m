@@ -19,9 +19,11 @@ function [tau_c] = defineTau(str,rockSedMask,x0)
 %     load("ISSM/x2dThwaites.mat",'x2dThwaites','y2dThwaites','BasalDragThwaites');
 %     uB = scatteredInterpolant(x2dThwaites,y2dThwaites,BasalDragThwaites,'linear','linear');
     if(opt)
-        scale = x0(1);
+        scale_p = x0(1);
+        scale_l = x0(2);
     else 
-        scale = 1.1963;
+        scale_p = 1.327;
+        scale_l = 0.437;
     end
     xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
     yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
@@ -32,8 +34,8 @@ function [tau_c] = defineTau(str,rockSedMask,x0)
     uB_p = griddedInterpolant(xx,yy,tau(:,:,21));
     
     tau_c = @(x,y,u,v,grounded) ...
-        ( 1 + rockSedMask(x,y))  .* pow_pos(norms([u,v],2,2),2) .* subplus(uB(x,y));
-    
+        scale_p .* ( .1 + rockSedMask(x,y))  .* norms([u,v],2,2) .* subplus(uB_p(x,y)) + ...
+        scale_l .* ( 1 - rockSedMask(x,y))  .* pow_pos(norms([u,v],2,2),2) .* subplus(uB(x,y));
     elseif(str == "ISSM")  % from https://tc.copernicus.org/articles/13/1441/2019/tc-13-1441-2019.html
     if(opt)
         scale = x0(1);

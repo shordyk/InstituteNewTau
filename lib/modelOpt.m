@@ -17,7 +17,7 @@ initializeModel();
 
 %% Define \tau
 % Define map of basal strength according to named scenario. 
-tau_c = defineTau(str,h_s_init,h_b_init,phi_init,phi_max,phi_min,x0);
+tau_c = defineTau(str,rockSedMask,x0);
 
 %% Build System
 buildSystem();

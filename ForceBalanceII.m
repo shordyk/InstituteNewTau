@@ -5,15 +5,16 @@ icey = cbrewer('div','BrBG',48);
 rho = 917;
 rho_w = 1000;
 g = 9.81;
-B = 7.5e7; % A = 2.4e-24 Pa^(-3) s^(-1)
+B = 1.6e8; % A = 2.4e-25 Pa^(-3) s^(-1)
+A = 2.4e-25;
 overgrab = 0;
 xmax = -7e5;
 xmin = -12e5;
 ymax =  5e5;
 ymin =  -1e5;
 
-dx = 2e3;
-smth = 6e3;
+dx = 1e3;
+smth = 4e3;
 xi = xmin-dx*overgrab:dx:xmax+dx*overgrab;
 yi = ymin-dx*overgrab:dx:ymax+dx*overgrab;
 [Xi,Yi] = meshgrid(xi,yi);
@@ -112,6 +113,11 @@ lat = lat .* mask;
 lon = lon .* mask;
 bed = bed .* mask;
 spd2 = spd2 .* mask;
+
+% Internal Deformation expected over a locked bed [m/yr]
+% u_int = dr^3 * H * A;
+
+u_int = 2 / 4 *abs(bed).^3 .* h * A * 3.154e7;
 %%
 figure(1)
 clf
@@ -316,21 +322,84 @@ allfig2(p,lat)
 
 figure(6)
 clf
-p = surf(Xi,Yi,b_raw,log10(spd2));
+p = surf(Xi,Yi,b_raw,(spd2));
 hold on
 set(p, 'edgecolor', 'none');
-p = surf(Xi,Yi,sf_raw,log10(spd2),'facealpha',0.75);
+p = surf(Xi,Yi,sf_raw,(spd2),'facealpha',0.75);
 title('Elevation')
 set(p, 'edgecolor', 'none');
-% colormap(icey);
+colormap(parula);
 % caxis([-2000 2000])
 % axis equal
 setFontSize(16);
 c = colorbar;
-c.Label.String = 'Bed Elevation [m]';
-colormap(icey);
+c.Label.String = 'Ice Surface Speed [m/yr]';
+f = gca;
+f.ColorScale = 'log';
+set(p, 'edgecolor', 'none');
+%%
+
+figure(7)
+clf
+
+p = surf(Xi,Yi,sf_raw,(spd2),'facealpha',1);
+hold on
+contour3(Xi,Yi,sf_raw,[-1000:100:2000],'-','color',rgb('gray'))
+contour3(Xi,Yi,sf_raw,[-1000:500:2000],'k-')
+title('Elevation')
+set(p, 'edgecolor', 'none');
+colormap(parula);
+% caxis([-2000 2000])
+% axis equal
+setFontSize(16);
+c = colorbar;
+c.Label.String = 'Ice Surface Speed [m/yr]';
+f = gca;
+f.ColorScale = 'log';
 set(p, 'edgecolor', 'none');
 
+%%
+figure(8)
+clf
+subplot(121)
+p = surf(Xi,Yi,zeros(size(ss)),u_int);
+title('Vertical Creep (Idealized)')
+hold on
+contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
+contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
+contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+allfig2(p,u_int)
+caxis([0 100])
+c = colorbar;
+c.Label.String = '[m/yr]';
+
+subplot(122)
+p = surf(Xi,Yi,zeros(size(ss)),(abs(u_int)./spd2*100));
+title('Internal Creep Factor')
+hold on
+contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
+contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
+contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+allfig2(p,u_int./spd2*100)
+c = colorbar;
+caxis([0,100]);
+c.Label.String = '[%]';
+f = gca;
+f.ColorScale = 'linear';
+%%
+figure(9)
+clf
+p = surf(Xi,Yi,zeros(size(ss)),h);
+title('Thickness')
+hold on
+contour(xi,yi,spd2, [10, 10] , 'k:','HandleVisibility','off')
+contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
+contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
+contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+allfig2(p,h)
+c = colorbar;
+c.Label.String = '[m]';
+caxis([0 3000])
 
 function [] = allfig(p)
 set(p, 'edgecolor', 'none');

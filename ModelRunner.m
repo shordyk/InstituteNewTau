@@ -183,11 +183,12 @@ colorbar
 colormap(gca, Cmap/255.0)
 view(2)
 axis equal
-
+%%
 
 [um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
 figure
-trisurf(t,xy(:,1),xy(:,2),tau_c(xy(:,1),xy(:,2),um,vm)./norms([um,vm],2,2),...
+trisurf(t,xy(:,1),xy(:,2),tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2),...
        'edgecolor','none')
+caxis([0 1e5])
 view(2)
 colorbar
