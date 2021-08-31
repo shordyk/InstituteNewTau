@@ -191,9 +191,10 @@ disp(res)
 
 end
 %% Visualization
+u_og = u;
 u = u*pi*1E7;
 T = T - 273;
-
+%%
 trisurf(t,xy(:,1),xy(:,2),u,u,...
        'edgecolor','none','facecolor','interp');
 hold on
@@ -237,5 +238,11 @@ plot(ch_loc:1E2:sed_trans_r,sed_var_r*((80E3-(ch_loc:1E2:sed_trans_r))/80E3) + c
 axis([-30E3,80E3,15E3,50E3])
 setFontSize(16)
 
+figure
+trisurf(t,xy(:,1),xy(:,2),tau_c(xy(:,1),xy(:,2),u_og)./u_og,...
+       'edgecolor','none','facecolor','interp');
+colorbar
+view(2)
+set(gca,'ColorScale','log')
 %figure 
 %bedmap2_profile(profile_lat(profile_path < 110E3),profile_lon(profile_path < 110E3))
