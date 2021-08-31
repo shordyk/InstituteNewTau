@@ -12,7 +12,7 @@ f = rho*g*sin(alpha);
 dx = 880;                     %dx: nominal grid spacing
 vert_scale = 0.375;
 dy = vert_scale*dx;
-% Numerical experiment #1 (uniform strength)
+% % Numerical experiment #1 (uniform strength)
 % beta = 4.1E6;
 % rock_trans = 15.1E3;
 % sed_const = 23.95E3;
@@ -22,17 +22,18 @@ dy = vert_scale*dx;
 % ch_str = 0;
 % ch_decay = 7E3;
 % ch_loc = 0E3;
-% Numerical experiment #2 (linear strength)
-% beta = 4E6;
-% rock_trans = 13.5E3;
-% sed_const = 16.55E3;
-% sed_var = 16E3;
-% sed_trans_l = -23E3;
-% sed_trans_r = 71E3;
-% ch_str = 0;
-% ch_decay = 7E3;
-% ch_loc = 0E3;
-% Numerical experiment #3 (all plastic)
+% % Numerical experiment #2 (linear strength)
+beta_var = 0;
+beta = 4E6;
+rock_trans = 13.5E3;
+sed_const = 16.55E3;
+sed_var = 16E3;
+sed_trans_l = -23E3;
+sed_trans_r = 71E3;
+ch_str = 0;
+ch_decay = 7E3;
+ch_loc = 0E3;
+% % Numerical experiment #3 (all plastic)
 % beta = 0;
 % rock_trans = -23E3;
 % sed_const = 17E3;
@@ -42,18 +43,18 @@ dy = vert_scale*dx;
 % ch_str = 500;
 % ch_decay = 20E3;
 % ch_loc = 13E3;
-% Numerical experiment #4 (rock/sediment with channel)
-beta_var = 5E6;
-beta = 2.9E6;
-rock_trans = 10E3;
-sed_const = 19.4E3;
-sed_var = 8E3;
-sed_trans_l = -23E3;
-sed_trans_r = 71E3;
-ch_str = 24.5E3;
-ch_decay = 5.9E3;
-ch_loc = 10E3;
-% Numerical experiment #4 (all plastic with channel)
+% % Numerical experiment #4 (rock/sediment with channel)
+% beta_var = 5E6;
+% beta = 2.9E6;
+% rock_trans = 10E3;
+% sed_const = 19.4E3;
+% sed_var = 8E3;
+% sed_trans_l = -23E3;
+% sed_trans_r = 71E3;
+% ch_str = 24.5E3;
+% ch_decay = 5.9E3;
+% ch_loc = 10E3;
+% % Numerical experiment #5 (all plastic with channel)
 % beta = 4.1E6;
 % rock_trans = 0E3;
 % sed_const = 23.95E3;
@@ -193,11 +194,14 @@ disp(res)
 
 end
 %% Visualization
+
+u_og = u;
 u = u*pi*1E7;
 T = T - 273;
+%%
 
 trisurf(t,xy(:,1),xy(:,2),u,u,...
-       'edgecolor','none','facecolor','interp');
+       'edgecolor','none');%,'facecolor','interp');
 hold on
 %tricontour(t,xy(:,1),xy(:,2),u,...
 %           [0,.001,.002,.003,.004,.005,.006,.007,.008,.009,.010,.011,.012,.013,.014,.015,.016]);
@@ -241,5 +245,11 @@ plot(rock_trans:1E2:sed_trans_r,sed_var*((80E3-(rock_trans:1E2:sed_trans_r))/80E
 axis([-30E3,80E3,15E3,55E3])
 setFontSize(16)
 
+figure
+scatter(xy(:,1),xy(:,2),[],tau_c(xy(:,1),xy(:,2),u_og)./u_og,...
+      'filled');
+colorbar
+view(2)
+caxis([0 50e3])
 %figure 
 %bedmap2_profile(profile_lat(profile_path < 110E3),profile_lon(profile_path < 110E3))
