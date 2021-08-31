@@ -14,8 +14,8 @@
 % Scenario to run if running one at a time comment out below, run this file
 % directly
 
-% str = 'Hydro';
-% mapFile = 'ThwaitesBasinGrid.mat';
+% str = 'Mixed';
+% mapFile = 'gridInstitute5000.mat';
 
 % Comment so we know what's happening, thats always nice.
 disp("Running " + str + " now...");
@@ -28,7 +28,7 @@ initializeModel();
 
 %% Define \tau
 % Define map of basal strength according to named scenario. 
-tau_c = defineTau(str,rockSedMask);
+tau_c = defineTau(str);
 
 %% Build System
 buildSystem();
@@ -53,8 +53,9 @@ for t_i = 1:100
         % Peclet number  [ ]
         Pe =@(x,y) rho*C_p.*Acc(x,y).*subplus(h_s_init(x,y)-h_b_init(x,y))./K;
 
-        % Vertical Peclet number  [ ]
-        La =@(x,y) lambda(x,y).*subplus(h_s_init(x,y)-h_b_init(x,y)).^2./(K*(T_m-T_s(x,y)));
+        % Horizontal Peclet number  [ ]
+%         La =@(x,y) lambda(x,y).*subplus(h_s_init(x,y)-h_b_init(x,y)).^2./(K*(T_m-T_s(x,y)));
+        La =@(x,y) zeros(size(x)); %exclude advection
         
         % Critical Strain [s^-1]
         ep_star =@(x,y) ((La(x,y)/2 + ((Pe(x,y).^2)/2)./(Pe(x,y)-1+exp(-Pe(x,y))))).^(nn/(nn+1))...
@@ -106,6 +107,8 @@ for t_i = 1:100
             v(dwnSt_bound) == spd_BC_v./3.154E7;
             u(upSt_bound) == spd_BC_u2./3.154E7;
             v(upSt_bound) == spd_BC_v2./3.154E7;
+            u(lfSt_bound) == spd_BC_uL./3.154E7;
+            v(lfSt_bound) == spd_BC_vL./3.154E7;
         minimize(obj)
     cvx_end
     if(~strcmp(cvx_status,"Solved"))
@@ -121,7 +124,7 @@ for t_i = 1:100
 end
 %% Save data to data file
 mpClean = erase(mapFile, [".mat","workingGrid_"]);
-save("data/data_" + mpClean + str + ".mat");
+save("data/data_" + mpClean + str + "noAdvect.mat");
 
 %% Vis out of loop
 spd2 = measures_interp('speed',xy(:,1),xy(:,2)); %[m/yr]
@@ -164,7 +167,7 @@ hold on
 trisurf(t,xy(:,1),xy(:,2),h_b_init(xy(:,1),xy(:,2)),...
        'edgecolor','black','facecolor','none')
 colorbar
-% caxis([50e3 150e3]);
+caxis([0e3 100e3]);
 colormap(gca, Cmap/255.0)
 title('Basal \tau')
 xlabel('X')
@@ -179,7 +182,7 @@ title('Driving force')
 xlabel('X')
 ylabel('Y')
 colorbar
-% caxis([0e3 150e3]);
+caxis([0e3 150e3]);
 colormap(gca, Cmap/255.0)
 view(2)
 axis equal

@@ -18,8 +18,8 @@ clc
 addpath('lib') 
 
 % Name of scenarios to run, only 1 map file used here.
-nameToRun = ["Mixed"];
-mapsToRun = ["gridInstitute5000.mat"];
+nameToRun = ["ISSM_Linear"];
+mapsToRun = ["gridInstitute24000.mat"];
 
 for j = 1:length(mapsToRun)
     for i = 1:length(nameToRun)
