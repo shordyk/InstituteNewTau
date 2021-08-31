@@ -75,6 +75,7 @@ phi_min = min(min(phi_init(xy(:,1),xy(:,2))));
 %% Mask Between rock/sed (0 is rock, 1 is sed)
 
 rockSed = double(Yi > -(Xi + 5e5)/1.7); %divide between rock/sed midstream
+rockSed2 = heaviside(Yi + (Xi + 5e5)/1.7);
 rockSedMask = griddedInterpolant(Xi',Yi',rockSed','nearest');   
 
 %% Create vectors of bed/surface for numerical solving

@@ -1,20 +1,20 @@
 % File used to test/sandbox out functions on the grid. Mostly for work importing from external datasets and make plots
 %% Make Grid
 clear
-close all
+% close all
 
 if(true) %gate to actually make a new grid
-    dx = 4e3;    %dx: nominal grid spacing [m]
+    dx = 3e3;    %dx: nominal grid spacing [m]
 
-    xmax = -8.75e5;
-    xmin = -9.75e5;
-    ymax =  3.5e5;
-    ymin =  1.5e5;
+    xmax =  -8.45e5;
+    xmin =  -9.70e5;
+    ymax =   3.20e5;
+    ymin =   1.80e5;
 
     x_range = xmax-xmin; 
     y_range = ymax-ymin;
 
-    theta = pi/3; %[rad] angle of rotation
+    theta = pi*.20; %[rad] angle of rotation
     % Mesh Generation
     clf
     pv = [xmin,ymax;xmin,ymin;xmax,ymin;xmax,ymax];
@@ -30,7 +30,7 @@ if(true) %gate to actually make a new grid
     rtSt_bound  = xy(:,2) > ymax - dx*1/3;
     %Rotate to align with flow (anti flow really)
     xy = ((xy - mean(xy)) * [cos(theta) -sin(theta); sin(theta) cos(theta)]) + mean(xy);
-    save("gridInstitute" + dx + ".mat");
+    save("gridInstitute2" + dx + ".mat");
 end
 % load('workingGrid_x12_2.mat')
 icey = cbrewer('div','BrBG',48);
@@ -82,6 +82,30 @@ smoothspd  = imgaussfilt(spd,filter);
 smoothu    = imgaussfilt(u,filter);
 smoothv    = imgaussfilt(v,filter);
 
+%%
+figure(3)
+clf
+% subplot(211)
+surf(Xi,Yi,zeros(size(spd)),log10(spd),'edgecolor', 'none');
+hold on 
+plot(xy(dwnSt_bound == 1,1),xy(dwnSt_bound == 1,2),'k','linewidth',2)
+plot(xy(upSt_bound == 1,1),xy(upSt_bound == 1,2),'k','linewidth',2)
+plot(xy(rtSt_bound == 1,1),xy(rtSt_bound == 1,2),'k','linewidth',2)
+plot(xy(lfSt_bound == 1,1),xy(lfSt_bound == 1,2),'k','linewidth',2)
+bedmachine('gl','k')
+xj = linspace(-1044e3, -841e3,50);
+yj = linspace(305e3, 235e3,50);
+plot(xj,yj,'r-')
+title('Domain')
+view(2)
+axis equal
+setFontSize(16);
+c = colorbar;
+c.Label.String = 'Log_{10} Speed [m/yr]';
+% 
+% subplot(212)
+% bedmachine_profile(xj,yj)
+setFontSize(16)
 
 
 
@@ -143,42 +167,44 @@ smoothv    = imgaussfilt(v,filter);
 % %         axis equal
         
 %% 
-figure
-    clf
-    h = pcolor(Xi,Yi,spd);
-    hold on;
-    set(h, 'EdgeColor', 'none');
-    
-%     scatter(xy(:,1),xy(:,2),'wo')
-    title('Bed Height');
-    alpha(h,1);
-%     scatter(xy(lfSt_bound,1),xy(lfSt_bound,2),'ko')
-%     scatter(xy(rtSt_bound,1),xy(rtSt_bound,2),'ko')
-    trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),'edgecolor','w','facecolor','none')
-    plot(xy(upSt_bound,1),xy(upSt_bound,2),'k','Linewidth',4)
-    plot(xy(dwnSt_bound,1),xy(dwnSt_bound,2),'k','Linewidth',4)
-    plot(xy(lfSt_bound,1),xy(lfSt_bound,2),'k','Linewidth',4)
-    plot(xy(rtSt_bound,1),xy(rtSt_bound,2),'k','Linewidth',4)
-    scatter(xy(upSt_bound,1),xy(upSt_bound,2),[],rgb('light red'),'filled')
-    scatter(xy(dwnSt_bound,1),xy(dwnSt_bound,2),[],rgb('dark red'),'filled')
-%     p = plot(S,'-','linewidth',3,'color',rgb('blue'));
-%     scatter(st2x,st2y,200,'mp','filled');
-%     plot(antiFlowx(:,[2,5,10]),antiFlowy(:,[2,5,10]),'k','linewidth',3)
-    % slphi = streamline(stream2(Xi,Yi,phix,phiy,phiX0,phiY0,[.1]));
-    % set(slphi,'Color','red')
-%     slVel = streamline(stream2(Xi,Yi,u,v,startX([1,8,end]),startY([1,8,end])));
-%     set(slVel,'Color','blue','linewidth',3)
-%     contour(xi,yi,log10(ds), [1.8:.2:2.2] , 'r-','HandleVisibility','off');
-    contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off');
-    contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
-    contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
-    view(2);
-    colorbar
-%     caxis([-.6 3.6]); 
-%     legend('Log_{10} Speed','Model Domain','TIME Site 2','Antiflow lines','Flow Lines'...,'Vel Streamlines','Phi Steamlines','Meltwater Routing',);
-%         );
-%     axis off
-    axis equal
+% figure
+%     clf
+%     h = pcolor(Xi,Yi,spd);
+%     hold on;
+%     set(h, 'EdgeColor', 'none');
+%     
+% %     scatter(xy(:,1),xy(:,2),'wo')
+%     title('Bed Height');
+%     alpha(h,1);
+% %     scatter(xy(lfSt_bound,1),xy(lfSt_bound,2),'ko')
+% %     scatter(xy(rtSt_bound,1),xy(rtSt_bound,2),'ko')
+%     trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),'edgecolor','w','facecolor','none')
+%     plot(xy(upSt_bound,1),xy(upSt_bound,2),'k','Linewidth',4)
+%     plot(xy(dwnSt_bound,1),xy(dwnSt_bound,2),'k','Linewidth',4)
+%     plot(xy(lfSt_bound,1),xy(lfSt_bound,2),'k','Linewidth',4)
+%     plot(xy(rtSt_bound,1),xy(rtSt_bound,2),'k','Linewidth',4)
+%     scatter(xy(upSt_bound,1),xy(upSt_bound,2),[],rgb('light red'),'filled')
+%     scatter(xy(dwnSt_bound,1),xy(dwnSt_bound,2),[],rgb('dark red'),'filled')
+% %     p = plot(S,'-','linewidth',3,'color',rgb('blue'));
+% %     scatter(st2x,st2y,200,'mp','filled');
+% %     plot(antiFlowx(:,[2,5,10]),antiFlowy(:,[2,5,10]),'k','linewidth',3)
+%     % slphi = streamline(stream2(Xi,Yi,phix,phiy,phiX0,phiY0,[.1]));
+%     % set(slphi,'Color','red')
+% %     slVel = streamline(stream2(Xi,Yi,u,v,startX([1,8,end]),startY([1,8,end])));
+% %     set(slVel,'Color','blue','linewidth',3)
+% %     contour(xi,yi,log10(ds), [1.8:.2:2.2] , 'r-','HandleVisibility','off');
+%     contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off');
+%     contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
+%     contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
+%     view(2);
+%     colorbar
+% %     caxis([-.6 3.6]); 
+% %     legend('Log_{10} Speed','Model Domain','TIME Site 2','Antiflow lines','Flow Lines'...,'Vel Streamlines','Phi Steamlines','Meltwater Routing',);
+% %         );
+% %     axis off
+%     axis equal
+%     caxis([10^(-.5) 10^2.5])
+%     set(gca,'ColorScale','log')
 %% 
 % figure(2)
 %     clf
