@@ -1,5 +1,6 @@
 % Mapping strain and driving force for institute methods of Van Der Veen 1989
 clear; close all
+addpath lib
 load Dawn.mat
 icey = cbrewer('div','BrBG',48);
 rho = 917;
@@ -13,7 +14,7 @@ xmin = -12e5;
 ymax =  5e5;
 ymin =  -1e5;
 
-dx = 1e3;
+dx = 3e3;
 smth = 4e3;
 xi = xmin-dx*overgrab:dx:xmax+dx*overgrab;
 yi = ymin-dx*overgrab:dx:ymax+dx*overgrab;
@@ -147,12 +148,12 @@ set(p, 'edgecolor', 'none');
 colormap(ax(2),icey);
 caxis([-2000 500])
 view(2)
-% axis equal
+axis equal
 setFontSize(16);
 c = colorbar;
 c.Label.String = 'Bed Elevation [m]';
 
-
+%%
 figure(2)
 clf
 ax(1) = subplot(121);
@@ -293,20 +294,32 @@ setFontSize(16)
 % setFontSize(16)
 %% 
 figure(4)
-z = abs(lat)./(abs(lon)+1);
-p = surf(Xi,Yi,zeros(size(ss)),z);
-title('Ratio of Lat to Lon')
-hold on
-contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
-contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
-contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
-allfig2(p,z)
-caxis([0, 10])
+load gridInstitute3000.mat
+clf
+subplot(211)
+surf(Xi,Yi,zeros(size(ss)),log10(spd2),'edgecolor', 'none');
+hold on 
+plot(xy(dwnSt_bound == 1,1),xy(dwnSt_bound == 1,2),'k','linewidth',2)
+plot(xy(upSt_bound == 1,1),xy(upSt_bound == 1,2),'k','linewidth',2)
+plot(xy(rtSt_bound == 1,1),xy(rtSt_bound == 1,2),'k','linewidth',2)
+plot(xy(lfSt_bound == 1,1),xy(lfSt_bound == 1,2),'k','linewidth',2)
+bedmachine('gl','k')
+clear xi yi
+xi = linspace(-1044e3, -841e3,50);
+yi = linspace(305e3, 235e3,50);
+plot(xi,yi,'r-')
+title('Domain')
+view(2)
+axis equal
+setFontSize(16);
 c = colorbar;
-c.Label.String = '[%]';
+c.Label.String = 'Log_{10} Speed [m/yr]';
 
+subplot(212)
+bedmachine_profile(xi,yi)
+clear xi yi
 setFontSize(16)
-
+%%
 figure(5)
 clf
 colormap redblue
@@ -400,6 +413,23 @@ allfig2(p,h)
 c = colorbar;
 c.Label.String = '[m]';
 caxis([0 3000])
+%%
+figure(10)
+clf
+p = contourf(Xi,Yi,imgaussfilt(b_raw,3),10);
+hold on
+contour(xi,yi,spd2, [10, 10] , 'k:','HandleVisibility','off')
+contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
+contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
+contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+title('Bed elevation')
+colormap(ax(2),icey);
+caxis([-2000 500])
+view(2)
+axis equal
+setFontSize(16);
+c = colorbar;
+c.Label.String = 'Bed Elevation [m]';
 
 function [] = allfig(p)
 set(p, 'edgecolor', 'none');
