@@ -24,17 +24,16 @@ end
 %%
 load vel_profiles_paul.mat
 figure
-mapzoomps('Institute Ice Stream')
-measuresps('speed')
-% [x,y,c] = measures_data('speed',xlim,ylim,'xy');
-% h = pcolor(x,y,c);
-% set(h, 'EdgeColor', 'none');
+mapzoomps('Institute Ice Stream');
+measuresps('speed')% [x,y,c] = measures_data('speed',xlim,ylim,'xy');
 plotps(profile_lat,profile_lon,'k','LineWidth',5)
 hold on
 % plotm(seed_lat, seed_lon)
-bedmachine('surface','contour',0:100:5000,'k')
+bedmachine('surface','contour',0:50:1000,'k')
 caxis([1 1200]);
 set(gca,'ColorScale','log')
+load measuresColor.mat
+colormap(gca, measuresColor)
 colorbar
 %%
 figure
