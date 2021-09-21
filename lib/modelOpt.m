@@ -8,7 +8,7 @@ function [resid] = modelOpt(x0,str)
 
 %% Initialization
 
-mapFile = "gridInstitute5000.mat";
+mapFile = "gridInstitute24000.mat";
 % Load input files
 initializeInputs();
 
@@ -17,7 +17,7 @@ initializeModel();
 
 %% Define \tau
 % Define map of basal strength according to named scenario. 
-tau_c = defineTau(str,rockSedMask,x0);
+tau_c = defineTau(str,x0);
 
 %% Build System
 buildSystem();
@@ -80,7 +80,7 @@ for t_i = 1:1%00
     % CVX may throw a warning about non-empty problems here, that is OK.
     cvx_begin quiet
         variables u(nN) v(nN)
-        obj = 2.*a./p.*sum(E_man*enhance.*h_av.*tau_area.*pow_pos(norms([A*u,B*v,1/2*(B*u+A*v)],2,2),p)) + ...
+        obj = 2.*a./p.*sum(enhance.*h_av.*tau_area.*pow_pos(norms([A*u,B*v,1/2*(B*u+A*v)],2,2),p)) + ...
               F*tau_c(xy(:,1),xy(:,2),u,v) + ...
               rho*g*sum(h_av.*((A*h_s).*(D*u) + (B*h_s).*(D*v)));
         subject to
@@ -88,6 +88,8 @@ for t_i = 1:1%00
             v(dwnSt_bound) == spd_BC_v./3.154E7;
             u(upSt_bound) == spd_BC_u2./3.154E7;
             v(upSt_bound) == spd_BC_v2./3.154E7;
+            u(lfSt_bound) == spd_BC_uL./3.154E7;
+            v(lfSt_bound) == spd_BC_vL./3.154E7;
         minimize(obj)
     cvx_end
     if(~strcmp(cvx_status,"Solved"))
