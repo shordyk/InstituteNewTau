@@ -44,16 +44,16 @@ ch_loc = 0E3;
 % ch_decay = 20E3;
 % ch_loc = 13E3;
 % % Numerical experiment #4 (rock/sediment with channel)
-% beta_var = 5E6;
-% beta = 2.9E6;
-% rock_trans = 10E3;
-% sed_const = 19.4E3;
-% sed_var = 8E3;
-% sed_trans_l = -23E3;
-% sed_trans_r = 71E3;
-% ch_str = 24.5E3;
-% ch_decay = 5.9E3;
-% ch_loc = 10E3;
+beta_var = 5E6;
+beta = 2.9E6;
+rock_trans = 10E3;
+sed_const = 19.4E3;
+sed_var = 8E3;
+sed_trans_l = -23E3;
+sed_trans_r = 71E3;
+ch_str = 24.5E3;
+ch_decay = 5.9E3;
+ch_loc = 10E3;
 % % Numerical experiment #5 (all plastic with channel)
 % beta = 4.1E6;
 % rock_trans = 0E3;
