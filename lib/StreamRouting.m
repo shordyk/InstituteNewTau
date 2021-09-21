@@ -3,8 +3,8 @@
 % https://www.mathworks.com/matlabcentral/fileexchange/55018-bedhead
 
 clear;
-[thwaiteslat,thwaiteslon] = scarloc('thwaites glacier');
-[X,Y,head] = bedhead(thwaiteslat,thwaiteslon,200);
+[lat,lon] = scarloc('institute ice stream');
+[X,Y,head] = bedhead(lat,lon,200);
 
 %% Chose DEM product
 surfDEM = bedmachine_interp('surface',X,Y);
@@ -41,8 +41,8 @@ BasalMelt = GRIDobj(X,Y,HeatFlux);
 
 %Calculate flow accumulation
 Accumw = flowacc(FD,BasalMelt);
-
-thresh = 25;
+%% 
+thresh = 1200;
 S = STREAMobj(FD,Accumw>thresh);
 
 drain_dist =@(xq,yq,r) arrayfun(@(xqq,yqq) sum(exp(-norms([S.x S.y]-[xqq yqq],2,2)/r)),xq,yq);
@@ -59,5 +59,5 @@ view(2)
 colorbar
 axis equal
 
-save('Streams_BedMap','S','drain_dist')
+save('Streams_BedMachine','S','drain_dist')
 
