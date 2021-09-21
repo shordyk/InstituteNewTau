@@ -187,12 +187,29 @@ colormap(gca, Cmap/255.0)
 view(2)
 axis equal
 
-load institute_antiflow/vel_profile_full.mat
-[antiflow_x, antiflow_y] = ll2ps(profile_lat,profile_lon);
+load institute_antiflow/vel_profiles_paul.mat
+[um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
 
 figure
+
+[antiflow_x, antiflow_y] = ll2ps(profile_lat(:,1),profile_lon(:,1));
 subplot(221)
 trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(u.^2 + v.^2)*3.154E7),...
+       'edgecolor','none')   
+caxis([0.3323  381.5379])
+hold on
+plot(antiflow_x,antiflow_y,'r','linewidth',3)
+title('Speed')
+xlabel('X')
+ylabel('Y')
+colorbar
+f = gca;
+f.ColorScale = 'log';
+view(2)
+axis equal
+
+subplot(222)
+trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(um.^2 + vm.^2)),...
        'edgecolor','none')   
 caxis([0.3323  381.5379])
 hold on
@@ -209,9 +226,49 @@ axis equal
 spd_interp = scatteredInterpolant(xy(:,1),xy(:,2),(sqrt(u.^2 + v.^2)*3.154E7));
 
 subplot(212)
-plot(profile_path-30.5E3,profile_cross,'LineWidth',3)
+plot(profile_path(:,1)-30.5E3,profile_cross(:,1),'LineWidth',3)
 hold on
-plot(profile_path-30.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
+plot(profile_path(:,1)-30.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
+
+figure
+
+[antiflow_x, antiflow_y] = ll2ps(profile_lat(:,3),profile_lon(:,3));
+subplot(221)
+trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(u.^2 + v.^2)*3.154E7),...
+       'edgecolor','none')   
+caxis([0.3323  381.5379])
+hold on
+plot(antiflow_x,antiflow_y,'r','linewidth',3)
+title('Speed')
+xlabel('X')
+ylabel('Y')
+colorbar
+f = gca;
+f.ColorScale = 'log';
+view(2)
+axis equal
+
+subplot(222)
+trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(um.^2 + vm.^2)),...
+       'edgecolor','none')   
+caxis([0.3323  381.5379])
+hold on
+plot(antiflow_x,antiflow_y,'r','linewidth',3)
+title('Speed')
+xlabel('X')
+ylabel('Y')
+colorbar
+f = gca;
+f.ColorScale = 'log';
+view(2)
+axis equal
+
+spd_interp = scatteredInterpolant(xy(:,1),xy(:,2),(sqrt(u.^2 + v.^2)*3.154E7));
+
+subplot(212)
+plot(profile_path(:,3)-30.5E3,profile_cross(:,3),'LineWidth',3)
+hold on
+plot(profile_path(:,3)-30.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
 %%
 
 [um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
