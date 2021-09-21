@@ -18,7 +18,7 @@ clc
 addpath('lib') 
 
 % Name of scenarios to run, only 1 map file used here.
-nameToRun = ["ISSM_Linear"];
+nameToRun = ["3Part"];
 mapsToRun = ["gridInstitute24000.mat"];
 
 for j = 1:length(mapsToRun)
@@ -29,4 +29,3 @@ for j = 1:length(mapsToRun)
         ModelRunner;
     end
 end
-
