@@ -198,6 +198,8 @@ end
 u_og = u;
 u = u*pi*1E7;
 T = T - 273;
+
+save("../data/AntiFlow2_4.mat");
 %%
 
 trisurf(t,xy(:,1),xy(:,2),u,u,...
@@ -222,7 +224,7 @@ subplot(2,1,2)
 plot(profile_path-30.5E3,gradient(profile_cross),'LineWidth',3)
 hold on
 plot(xy(xy(:,2) > 1500-dx/10,1),gradient(u(xy(:,2) > 1500-dx/10)),'LineWidth',3)
-axis([-30E3,80E3,-80,50])
+axis([-30E3,80E3,-80,500])
 setFontSize(16)
 
 figure('Position',[10 10 1000 200])
@@ -253,3 +255,5 @@ view(2)
 caxis([0 50e3])
 %figure 
 %bedmap2_profile(profile_lat(profile_path < 110E3),profile_lon(profile_path < 110E3))
+
+save 

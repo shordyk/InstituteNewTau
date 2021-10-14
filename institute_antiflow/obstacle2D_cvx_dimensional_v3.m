@@ -1,3 +1,6 @@
+% Runs Anti-flow line on upstream (confluence point) cross section. Adjust bed properties for
+% geometry and peak flow speed. 
+
 clc
 clear
 %% Initialization
@@ -198,6 +201,8 @@ end
 u_og = u;
 u = u*pi*1E7;
 T = T - 273;
+
+save("../data/AntiFlow3_4.mat");
 %%
 
 trisurf(t,xy(:,1),xy(:,2),u,u,...
