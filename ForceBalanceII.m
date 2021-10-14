@@ -2,6 +2,8 @@
 clear; close all
 addpath lib
 load Dawn.mat
+load vel_profiles_paul_gl.mat
+
 icey = cbrewer('div','BrBG',48);
 rho = 917;
 rho_w = 1000;
@@ -14,7 +16,7 @@ xmin = -12e5;
 ymax =  5e5;
 ymin =  -1e5;
 
-dx = 3e3;
+dx = 2e3;
 smth = 4e3;
 xi = xmin-dx*overgrab:dx:xmax+dx*overgrab;
 yi = ymin-dx*overgrab:dx:ymax+dx*overgrab;
@@ -209,6 +211,7 @@ hold on
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+bedmachine('gl','c-','linewidth',2)
 title('Driving Force')
 allfig2(p,dr)
 
@@ -218,6 +221,7 @@ hold on
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+bedmachine('gl','c-','linewidth',2)
 title('Longitudinal Stresses')
 allfig2(p,lon)
 
@@ -227,6 +231,7 @@ hold on
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+bedmachine('gl','c-','linewidth',2)
 title('Lateral Stresses')
 allfig2(p,lat)
 
@@ -237,6 +242,7 @@ hold on
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+bedmachine('gl','c-','linewidth',2)
 allfig2(p,bed)
 
 setFontSize(16)
@@ -294,7 +300,7 @@ setFontSize(16)
 % setFontSize(16)
 %% 
 figure(4)
-load gridInstitute3000.mat
+load gridInstitute24000.mat
 clf
 subplot(211)
 surf(Xi,Yi,zeros(size(ss)),log10(spd2),'edgecolor', 'none');
@@ -303,11 +309,10 @@ plot(xy(dwnSt_bound == 1,1),xy(dwnSt_bound == 1,2),'k','linewidth',2)
 plot(xy(upSt_bound == 1,1),xy(upSt_bound == 1,2),'k','linewidth',2)
 plot(xy(rtSt_bound == 1,1),xy(rtSt_bound == 1,2),'k','linewidth',2)
 plot(xy(lfSt_bound == 1,1),xy(lfSt_bound == 1,2),'k','linewidth',2)
-bedmachine('gl','k')
-clear xi yi
-xi = linspace(-1044e3, -841e3,50);
-yi = linspace(305e3, 235e3,50);
-plot(xi,yi,'r-')
+bedmachine('gl','k','linewidth',2)
+xx = linspace(-1044e3, -841e3,50);
+yy = linspace(305e3, 235e3,50);
+plot(xx,yy,'r-')
 title('Domain')
 view(2)
 axis equal
@@ -316,8 +321,8 @@ c = colorbar;
 c.Label.String = 'Log_{10} Speed [m/yr]';
 
 subplot(212)
-bedmachine_profile(xi,yi)
-clear xi yi
+bedmachine_profile(xx,yy)
+clear xx yy
 setFontSize(16)
 %%
 figure(5)
@@ -329,6 +334,7 @@ contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
 title('Lateral Stresses')
+bedmachine('gl','k','linewidth',2)
 allfig2(p,lat)
 
 %%
@@ -386,6 +392,7 @@ caxis([0 100])
 c = colorbar;
 c.Label.String = '[m/yr]';
 
+
 subplot(122)
 p = surf(Xi,Yi,zeros(size(ss)),(abs(u_int)./spd2*100));
 title('Internal Creep Factor')
@@ -430,6 +437,45 @@ axis equal
 setFontSize(16);
 c = colorbar;
 c.Label.String = 'Bed Elevation [m]';
+
+figure
+p = surf(Xi,Yi,zeros(size(ss)),sqrt(sx.^2+sy.^2));
+hold on
+contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
+contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
+contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+[C,h] = contour(xi,yi,sqrt(sx.^2+sy.^2), [1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1], 'r-','HandleVisibility','off');  
+clabel(C,h)
+title('Surface Slope')
+[profile_x, profile_y] = ll2ps(profile_lat,profile_lon);
+plot(profile_x, profile_y,'k','linewidth',3)
+bedmachine('gl','k','linewidth',2)
+f = gca;
+f.ColorScale = 'log';
+view(2)
+colorbar
+set(p, 'edgecolor', 'none');
+caxis([1e-6 1e-2])
+
+figure
+p = surf(Xi,Yi,zeros(size(ss)),measures_interp('err',Xi,Yi)./measures_interp('speed',Xi,Yi),...
+    'edgecolor', 'none');
+hold on
+contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
+contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
+contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+[profile_x, profile_y] = ll2ps(profile_lat,profile_lon);
+plot(profile_x, profile_y,'k','linewidth',3)
+view(2)
+f = gca;
+f.ColorScale = 'log';
+caxis([0 1])
+colorbar
+title('Percent error in speed')
+
+figure
+plot(profile_path,measures_interp('err',profile_x,profile_y)./measures_interp('speed',profile_x,profile_y))
+legend
 
 function [] = allfig(p)
 set(p, 'edgecolor', 'none');
