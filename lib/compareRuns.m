@@ -2,10 +2,10 @@ clear; close all
 
 %% Load data
 
-for i = 1:3
+for i = 1:2:3
     if(i == 1)
-    data1 = load('data/data_gridInstitute24000MixednoAdvect.mat');
-    data2 = load('data/data_gridInstitute24000Mixed_streamnoAdvect.mat');
+    data1 = load('data/data_gridInstitute24000MixedElmernoAdvect.mat');
+    data2 = load('data/data_gridInstitute24000MixedElmer_streamnoAdvect.mat');
     elseif(i ==2)
     data1 = load('data/data_gridInstitute24000ISSM_centernoAdvect.mat');
     data2 = load('data/data_gridInstitute24000ISSM_center_streamnoAdvect.mat');
