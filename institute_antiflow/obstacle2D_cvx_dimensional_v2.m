@@ -256,4 +256,4 @@ caxis([0 50e3])
 %figure 
 %bedmap2_profile(profile_lat(profile_path < 110E3),profile_lon(profile_path < 110E3))
 
-save 
+% save 

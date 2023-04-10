@@ -25,9 +25,9 @@ function [tau_c] = defineTau(str,x0)
         scale_p = .20;
         scale_l = .49;
     end
-    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
-    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     
     uB = griddedInterpolant(xx,yy,tau(:,:,21).*3.154e7./(measures_interp('speed',xx,yy)));
@@ -46,9 +46,9 @@ elseif(str == "Mixed_stream")  % also from https://tc.copernicus.org/articles/13
         scale_p = .20;
         scale_l = .49;
     end
-    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
-    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     load Streams_BedMachine.mat
     
@@ -69,9 +69,9 @@ elseif(str == "MixedELMER")  % also from https://tc.copernicus.org/articles/13/1
         scale_p = .412;
         scale_l = .454;
     end
-    xi   = ncread("ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","x");
-    yi   = ncread("ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","y");
-    tau  = ncread("ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi,yi);
     tau(isnan(tau)) = 0;
     
@@ -91,9 +91,9 @@ elseif(str == "MixedELMER_stream")  % also from https://tc.copernicus.org/articl
         scale_p = .412;
         scale_l = .454;
     end
-    xi   = ncread("ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","x");
-    yi   = ncread("ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","y");
-    tau  = ncread("ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi,yi);
     tau(isnan(tau)) = 0;
     load Streams_BedMachine.mat
@@ -115,9 +115,9 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
         scale_p = .50;
         scale_l = .7;
     end
-    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
-    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     
     uB = griddedInterpolant(xx,yy,tau(:,:,21).*3.154e7./(measures_interp('speed',xx,yy)));
@@ -136,9 +136,9 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
         scale_p = .50;
         scale_l = .7;
     end
-    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
-    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     
     uB = griddedInterpolant(xx,yy,tau(:,:,21).*3.154e7./(measures_interp('speed',xx,yy)));
@@ -155,9 +155,9 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
         scale_s = 0.24;
         scale_r = 1.05;
     end
-    xi   = ncread("ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","x");
-    yi   = ncread("ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","y");
-    tau  = ncread("ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi,yi);
     tau(isnan(tau)) = 0;
     uB = griddedInterpolant(xx,yy,tau(:,:,21));
@@ -174,9 +174,9 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
         scale_s = 0.24;
         scale_r = 1.05;
     end
-    xi   = ncread("ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","x");
-    yi   = ncread("ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","y");
-    tau  = ncread("ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/IGE_ELMER_ctrl/strbasemag_AIS_IGE_ELMER_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi,yi);
     tau(isnan(tau)) = 0;
     uB = griddedInterpolant(xx,yy,tau(:,:,21));
@@ -193,9 +193,9 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
     else 
         scale = 1.1963;
     end
-    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
-    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     uB = griddedInterpolant(xx,yy,tau(:,:,21));
     
@@ -209,9 +209,9 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
         scale_s = 0.18;
         scale_r = 1.19;
     end
-    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
-    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     uB = griddedInterpolant(xx,yy,tau(:,:,21));
     
@@ -227,9 +227,9 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
         scale_s = 0.18;
         scale_r = 1.19;
     end
-    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
-    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     uB = griddedInterpolant(xx,yy,tau(:,:,21));
     load Streams_BedMachine.mat
@@ -245,9 +245,9 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
     else 
         scale = 1.125;
     end
-    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
-    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     uB = griddedInterpolant(xx,yy,tau(:,:,21));
     
@@ -280,9 +280,9 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
         scale_p = 20e3; %[Pa]
         scale_l =  4e10; %[Pa s m^-1]
     end
-    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
-    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     uB = griddedInterpolant(xx,yy,tau(:,:,21).*3.154e7./(measures_interp('speed',xx,yy)));
     tau_c = @(x,y,u,v,grounded) ...
@@ -305,9 +305,9 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
     elseif(str == "ISSM_Linear")  % also from https://tc.copernicus.org/articles/13/1441/2019/tc-13-1441-2019.html
 %     load("ISSM/x2dThwaites.mat",'x2dThwaites','y2dThwaites','BasalDragThwaites');
 %     uB = scatteredInterpolant(x2dThwaites,y2dThwaites,BasalDragThwaites,'linear','linear');
-    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
-    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     uB = griddedInterpolant(xx,yy,tau(:,:,21).*3.154e7./(measures_interp('speed',xx,yy)));
     
@@ -316,9 +316,9 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
     elseif(str == "ISSM_Linear_stream")  % also from https://tc.copernicus.org/articles/13/1441/2019/tc-13-1441-2019.html
 %     load("ISSM/x2dThwaites.mat",'x2dThwaites','y2dThwaites','BasalDragThwaites');
 %     uB = scatteredInterpolant(x2dThwaites,y2dThwaites,BasalDragThwaites,'linear','linear');
-    xi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
-    yi   = ncread("ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-    tau  = ncread("ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+    yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+    tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     uB = griddedInterpolant(xx,yy,tau(:,:,21).*3.154e7./(measures_interp('speed',xx,yy)));
     load Streams_BedMachine.mat

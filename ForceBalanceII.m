@@ -477,6 +477,28 @@ figure
 plot(profile_path,measures_interp('err',profile_x,profile_y)./measures_interp('speed',profile_x,profile_y))
 legend
 
+%%
+figure
+h = sf-b;
+p = surf(Xi,Yi,zeros(size(ss)),h./(sqrt(sx.^2+sy.^2)*200e3));
+hold on
+contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
+contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
+contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+[C,hh] = contour(xi,yi,h./(sqrt(sx.^2+sy.^2)*200e3),[.1,.3,1,3,10], 'r-','HandleVisibility','off');  
+clabel(C,hh)
+title('perterbation factor')
+bedmachine('gl','k','linewidth',2)
+colormap redblue
+f = gca;
+f.ColorScale = 'log';
+view(2)
+colorbar
+set(p, 'edgecolor', 'none');
+caxis([1e-1 1e1])
+
+
+
 function [] = allfig(p)
 set(p, 'edgecolor', 'none');
 view(2)

@@ -1,8 +1,9 @@
 % Runs Anti-flow line on upstream (confluence point) cross section. Adjust bed properties for
 % geometry and peak flow speed. 
 
-clc
+clc, close all
 clear
+addpath ..
 %% Initialization
 % Physical parameters
 p = 4/3;
@@ -53,9 +54,9 @@ rock_trans = 10E3;
 sed_const = 19e3;%19.4E3;
 sed_var = 8E3;
 sed_trans_l = -23E3;
-sed_trans_r = 63e3;%71E3;
-ch_str = 24.5E3;
-ch_decay = 5.9E3;
+sed_trans_r = 73E3;
+ch_str = 25.5E3;
+ch_decay = 12.5E3;
 ch_loc = 10E3;
 % % Numerical experiment #5 (all plastic with channel)
 % beta = 4.1E6;
@@ -79,8 +80,8 @@ tau_c =@(x,y,u) (...
 
 
 %% Mesh Generation
-pv = 40E3.*[0,1;2,1;2,.93;.3,.9;-.3,.9;-.75,.925;-.75,1;0,1];
-[xy,t] = distmesh2d(@dpoly,@huniform,dx,40E3.*[-.85,.75;2.1,1.1],pv,pv);
+pv = 40E3.*[0,1;2.5,1;2.5,.93;.3,.9;-.3,.9;-.75,.925;-.75,1;0,1];
+[xy,t] = distmesh2d(@dpoly,@huniform,dx,40E3.*[-.85,.75;2.6,1.1],pv,pv);
 xy(:,2) = vert_scale*((xy(:,2)-40E3) - min(xy(:,2)-40E3));
 
 nN = size(xy,1);                     %nN: number of nodes
@@ -202,9 +203,9 @@ u_og = u;
 u = u*pi*1E7;
 T = T - 273;
 
-save("../data/AntiFlow3_4.mat");
+save("../data/AntiFlow2022_3_4.mat");
 %%
-
+figure
 trisurf(t,xy(:,1),xy(:,2),u,u,...
        'edgecolor','none');%,'facecolor','interp');
 hold on
@@ -214,7 +215,7 @@ plot3(xy(b(u(b) < 1e-6),1),xy(b(u(b) < 1e-6),2),max(u)+0*b(u(b) < 1e-6),'r.','Ma
 plot3(xy(b(b_dx==0),1),xy(b(b_dx==0),2),max(u)+0*b(b_dx==0),'b.','MarkerSize',20)
 view(2), colorbar
 
-load vel_profiles_paul.mat
+load vel_profiles_paul_gl_str_2022.mat
 % profile_lat   = profile_lat(:,3);
 % profile_lon   = profile_lon(:,3);
 % profile_cross = profile_cross(:,3);
@@ -230,19 +231,20 @@ xlabel('Along-track Distance [km]')
 figure('Position',[10 10 500 400])
 
 subplot(2,1,1)
-plot(profile_path(:,1)-30.5E3,profile_cross(:,1),'LineWidth',3)
+% plot(profile_path(:,1)-30.5E3,profile_cross(:,1),'LineWidth',3)
+
+plot(profile_path(:,3)-45E3,profile_cross(:,3),'LineWidth',3)
 hold on
-plot(profile_path(:,3)-30.5E3,profile_cross(:,3),'LineWidth',3)
 plot(xy(xy(:,2) > 1500-dx/10,1),u(xy(:,2) > 1500-dx/10),'LineWidth',3)
-legend('measures 1','measures 3','model')
+legend('measures 3','model')
 axis([-30E3,80E3,0,400])
 
 subplot(2,1,2)
-plot(profile_path(:,1)-30.5E3,gradient(profile_cross(:,1)),'LineWidth',3)
+% plot(profile_path(:,1)-45E3,gradient(profile_cross(:,1)),'LineWidth',3)
+plot(profile_path(:,3)-45E3,gradient(profile_cross(:,3)),'LineWidth',3)
 hold on
-plot(profile_path(:,3)-30.5E3,gradient(profile_cross(:,3)),'LineWidth',3)
 plot(xy(xy(:,2) > 1500-dx/10,1),gradient(u(xy(:,2) > 1500-dx/10)),'LineWidth',3)
-legend('measures 1','measures 3','model')
+legend('measures 3','model')
 axis([-30E3,80E3,-80,50])
 setFontSize(16)
 
@@ -269,6 +271,7 @@ setFontSize(16)
 figure
 scatter(xy(:,1),xy(:,2),[],tau_c(xy(:,1),xy(:,2),u_og)./u_og,...
       'filled');
+title('Tau')
 colorbar
 view(2)
 caxis([0 50e3])

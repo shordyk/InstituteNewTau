@@ -187,13 +187,15 @@ colormap(gca, Cmap/255.0)
 view(2)
 axis equal
 
-load institute_antiflow/vel_profiles_paul.mat
+% load institute_antiflow/vel_profiles_paul.mat
+ load vel_profiles_paul_gl_str_2022.mat
+
 [um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
 
 figure
 
 AF1 = load("data/AntiFlow2_4.mat");
-[antiflow_x, antiflow_y] = ll2ps(profile_lat(:,1),profile_lon(:,1));
+[antiflow_x, antiflow_y] = ll2ps(profile_lat(:,2),profile_lon(:,2));
 
 subplot(221)
 trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(u.^2 + v.^2)*3.154E7),...
@@ -228,9 +230,9 @@ axis equal
 spd_interp = scatteredInterpolant(xy(:,1),xy(:,2),(sqrt(u.^2 + v.^2)*3.154E7));
 
 subplot(212)
-plot(profile_path(:,1)-30.5E3,profile_cross(:,1),'LineWidth',3)
+plot(profile_path(:,2)-30.5E3,profile_cross(:,2),'LineWidth',3)
 hold on
-plot(profile_path(:,1)-30.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
+plot(profile_path(:,2)-30.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
 plot(AF1.xy(AF1.xy(:,2) > 1500-AF1.dx/10,1),AF1.u(AF1.xy(:,2) > 1500-AF1.dx/10),'LineWidth',3)
 legend('MEaSUREs','MapView Model','AntiFlow Model','Location','NorthWest')
 xlim([-30E3,80E3])
@@ -238,7 +240,7 @@ ylabel('[m/yr]')
 xlabel('[m]')
 figure
 
-AF1 = load("data/AntiFlow3_4.mat");
+AF1 = load("data/AntiFlow2022_3_4.mat");
 [antiflow_x, antiflow_y] = ll2ps(profile_lat(:,3),profile_lon(:,3));
 subplot(221)
 trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(u.^2 + v.^2)*3.154E7),...
@@ -273,15 +275,14 @@ axis equal
 spd_interp = scatteredInterpolant(xy(:,1),xy(:,2),(sqrt(u.^2 + v.^2)*3.154E7));
 
 subplot(212)
-plot(profile_path(:,3)-30.5E3,profile_cross(:,3),'LineWidth',3)
+plot(profile_path(:,3)-52.5E3,profile_cross(:,3),'LineWidth',3)
 hold on
-plot(profile_path(:,3)-30.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
+plot(profile_path(:,3)-52.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
 plot(AF1.xy(AF1.xy(:,2) > 1500-AF1.dx/10,1),AF1.u(AF1.xy(:,2) > 1500-AF1.dx/10),'LineWidth',3)
 legend('MEaSUREs','MapView Model','AntiFlow Model','Location','NorthWest')
 xlim([-30E3,80E3])
 ylabel('[m/yr]')
 xlabel('[m]')
-%%
 
 [um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
 figure
