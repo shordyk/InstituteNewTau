@@ -16,11 +16,12 @@ close all
 clc
 
 addpath('lib') 
+addpath('grid') 
 
 % Name of scenarios to run, only 1 map file used here.
 nameToRun = ["ISSM"];
-mapsToRun = ["gridInstitute24000.mat"];
-
+% mapsToRun = ["gridInstitute26000.mat"];
+mapsToRun = ["strainMesh035.mat"];
 for j = 1:length(mapsToRun)
     for i = 1:length(nameToRun)
         clearvars -except nameToRun mapsToRun i j

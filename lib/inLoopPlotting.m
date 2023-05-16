@@ -1,4 +1,9 @@
-figure(1);
+if(t_i ==1)
+fg1 = figure(1);
+fg2 = figure(2);  
+end
+
+set(0,'CurrentFigure',fg1);
     clf
         subplot(131)
             trisurf(t,xy(:,1),xy(:,2),log10(sqrt(u.^2 + v.^2)*3.154E7),...
@@ -30,7 +35,7 @@ figure(1);
             colorbar
             drawnow
     
-    figure(2);
+set(0,'CurrentFigure',fg2);
     clf
         subplot(131)
             trisurf(t,xy(:,1),xy(:,2),Br(xy(:,1),xy(:,2)),...

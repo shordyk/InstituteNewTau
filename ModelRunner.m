@@ -40,12 +40,12 @@ for t_i = 1:100
     % Strain rate [s^-1]
         ep_dot = calcTrigridStrain(u,v,xy,dx); %returns intperolation object
         
-        if(true)
-            T_calc = T;
-        else
-            T_calc = T_bar(xy(:,1),xy(:,2));
-        end
-        lambda  = calcAdvection(T_calc,u,v,xy,dx,rho,C_p); 
+%         if(true)  adjust if Advection calculation self-consistent
+%             T_calc = T;
+%         else
+%             T_calc = T_bar(xy(:,1),xy(:,2));
+%         end
+%         lambda  = calcAdvection(T_calc,u,v,xy,dx,rho,C_p); 
 
         % Brinkman number [ ]
         Br =@(x,y) 2*subplus(h_s_init(x,y)-h_b_init(x,y)).^2./(K*(T_m-T_s(x,y))).*((subplus(ep_dot(x,y)).^(nn+1))/A_m).^(1/nn);
@@ -72,7 +72,7 @@ for t_i = 1:100
 
     % Calc Enhancement Factors, relax into solution. Have max value for
     % stabilization
-    cap = 30^(-1/nn); %stability cap on enhancement
+    cap = 30^(-1/nn); %stability cap on enhancement TODO remove
     e_new = (E_t(xy_c(:,1),xy_c(:,2))).^(-1/nn);
     e_new(e_new < cap) = cap;  % max enhancement is a min viscosity
     
@@ -123,6 +123,7 @@ for t_i = 1:100
     inLoopPlotting;
 end
 %% Save data to data file
+clear fg1 fg2
 mpClean = erase(mapFile, [".mat","workingGrid_"]);
 save("data/data_" + mpClean + str + "noAdvect.mat");
 
@@ -288,6 +289,7 @@ xlabel('[m]')
 figure
 trisurf(t,xy(:,1),xy(:,2),tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2),...
        'edgecolor','none')
+title('Basal Strength');
 caxis([0 1e5])
 view(2)
 colorbar

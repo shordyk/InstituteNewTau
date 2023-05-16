@@ -25,9 +25,11 @@ function [tau_c] = defineTau(str,x0)
         scale_p = .20;
         scale_l = .49;
     end
+    warning('off','MATLAB:imagesci:netcdf:fillValueTypeMismatch'); % try not to warn here
     xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
     yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
     tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    warning('on','MATLAB:imagesci:netcdf:fillValueTypeMismatch'); 
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     
     uB = griddedInterpolant(xx,yy,tau(:,:,21).*3.154e7./(measures_interp('speed',xx,yy)));
@@ -191,11 +193,13 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
     if(opt)
         scale = x0(1);
     else 
-        scale = 1.1963;
+        scale = 1.1963; %adjustment factor, can't escape it
     end
+    warning('off','MATLAB:imagesci:netcdf:fillValueTypeMismatch'); % try not to warn here
     xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
     yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
     tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    warning('on','MATLAB:imagesci:netcdf:fillValueTypeMismatch');
     [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
     uB = griddedInterpolant(xx,yy,tau(:,:,21));
     
