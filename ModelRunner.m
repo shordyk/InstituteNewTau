@@ -103,12 +103,12 @@ for t_i = 1:100
               F*tau_c(xy(:,1),xy(:,2),u,v) + ...
               rho*g*sum(h_av.*((A*h_s).*(D*u) + (B*h_s).*(D*v)));
         subject to
-            u(dwnSt_bound) == spd_BC_u./3.154E7;
-            v(dwnSt_bound) == spd_BC_v./3.154E7;
-            u(upSt_bound) == spd_BC_u2./3.154E7;
-            v(upSt_bound) == spd_BC_v2./3.154E7;
-            u(lfSt_bound) == spd_BC_uL./3.154E7;
-            v(lfSt_bound) == spd_BC_vL./3.154E7;
+            u(nw_bound) == spd_BC_u./3.154E7;
+            v(nw_bound) == spd_BC_v./3.154E7;
+            u(se_bound) == spd_BC_u2./3.154E7;
+            v(se_bound) == spd_BC_v2./3.154E7;
+            u(sw_bound) == spd_BC_uL./3.154E7;
+            v(sw_bound) == spd_BC_vL./3.154E7;
         minimize(obj)
     cvx_end
     if(~strcmp(cvx_status,"Solved"))
