@@ -19,13 +19,14 @@ Bedmap2 Toolbox for Matlab https://www.mathworks.com/matlabcentral/fileexchange/
     Run bedmap2_download.m    
 Curve Fitting Toolbox
 Image Processing Toolbox
+cbrewer is used for many colormaps, but not needed if you change the colormaps
 
-
-Input
+Input:
 This code can be in series using "MainHelper.m" or directly for 1 case using "ModelRunner.m".
 First run distmesh.m to generate the mesh .mat file.  
 
-Output
+Output:
 Running "MainHelper.m" as configured now will produce basic figures for viewing the observed ice speed, computed ice speed, computed basal strength, and observed driving force. This will also save data files of the outputs in the data/ directory.
-Once the data is saves, you can use "SaveFigs.m" to generate the figures as formatted in the final paper. 
 
+Limitations:
+This code currently will not behave well on a Windows machine. It currently is designed to run on a Mac machine, or a linux server (like Sherlock). 
