@@ -14,8 +14,8 @@
 % Scenario to run if running one at a time comment out below, run this file
 % directly
 
-% str = 'Mixed';
-% mapFile = 'gridInstitute5000.mat';
+% str = 'XXX';
+% mapFile = 'XXX.mat';
 
 % Comment so we know what's happening, thats always nice.
 disp("Running " + str + " now...");
@@ -120,176 +120,180 @@ for t_i = 1:100
     % u and v are [m/s]    
     %% Visualization in loop 
     %(uncomment to see avg temp, enhancement, and Pe, Lambda, Br every loop
-    inLoopPlotting;
+    if(ismac)
+        inLoopPlotting;
+    end
 end
 %% Save data to data file
 clear fg1 fg2
-mpClean = erase(mapFile, [".mat","workingGrid_"]);
+mpClean = erase(mapFile, [".mat"]);
 save("data/data_" + mpClean + str + "noAdvect.mat");
 
 %% Vis out of loop
-spd2 = measures_interp('speed',xy(:,1),xy(:,2)); %[m/yr]
+if(ismac)
+    spd2 = measures_interp('speed',xy(:,1),xy(:,2)); %[m/yr]
 
-figure('Position', [0 0 1200 600]);
-clf
-sgtitle(str);
-subplot(141)
+    figure('Position', [0 0 1200 600]);
+    clf
+    sgtitle(str);
+    subplot(141)
 
-trisurf(t,xy(:,1),xy(:,2),zeros(size(spd2)),(spd2),...
-       'edgecolor','none')
-hold on
-title('Speed of Measures')
-xlabel('X')
-ylabel('Y')
-f = gca;
-f.ColorScale = 'log';
-view(2)
-colorbar
-view(2)
-axis equal
+    trisurf(t,xy(:,1),xy(:,2),zeros(size(spd2)),(spd2),...
+           'edgecolor','none')
+    hold on
+    title('Speed of Measures')
+    xlabel('X')
+    ylabel('Y')
+    f = gca;
+    f.ColorScale = 'log';
+    view(2)
+    colorbar
+    view(2)
+    axis equal
 
-subplot(142)
-trisurf(t,xy(:,1),xy(:,2),h_s_init(xy(:,1),xy(:,2)),(sqrt(u.^2 + v.^2)*3.154E7),...
-       'edgecolor','none')   
-caxis([0.3323  381.5379])
-title('Speed')
-xlabel('X')
-ylabel('Y')
-colorbar
-f = gca;
-f.ColorScale = 'log';
-view(2)
-axis equal
+    subplot(142)
+    trisurf(t,xy(:,1),xy(:,2),h_s_init(xy(:,1),xy(:,2)),(sqrt(u.^2 + v.^2)*3.154E7),...
+           'edgecolor','none')   
+    caxis([0.3323  381.5379])
+    title('Speed')
+    xlabel('X')
+    ylabel('Y')
+    colorbar
+    f = gca;
+    f.ColorScale = 'log';
+    view(2)
+    axis equal
 
-subplot(143)
-trisurf(t,xy(:,1),xy(:,2),tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2),...
-       'edgecolor','none')
-% hold on
-% trisurf(t,xy(:,1),xy(:,2),h_b_init(xy(:,1),xy(:,2)),...
-%        'edgecolor','black','facecolor','none')
-colorbar
-caxis([0e3 100e3]);
-colormap(gca, Cmap/255.0)
-title('Basal \tau')
-xlabel('X')
-ylabel('Y')
-view(2)
-axis equal
+    subplot(143)
+    trisurf(t,xy(:,1),xy(:,2),tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2),...
+           'edgecolor','none')
+    % hold on
+    % trisurf(t,xy(:,1),xy(:,2),h_b_init(xy(:,1),xy(:,2)),...
+    %        'edgecolor','black','facecolor','none')
+    colorbar
+    caxis([0e3 100e3]);
+    colormap(gca, Cmap/255.0)
+    title('Basal \tau')
+    xlabel('X')
+    ylabel('Y')
+    view(2)
+    axis equal
 
-subplot(144)
-trisurf(t_c,xy_c(:,1),xy_c(:,2),df,...
-    'edgecolor','none');
-title('Driving force')
-xlabel('X')
-ylabel('Y')
-colorbar
-caxis([0e3 150e3]);
-colormap(gca, Cmap/255.0)
-view(2)
-axis equal
+    subplot(144)
+    trisurf(t_c,xy_c(:,1),xy_c(:,2),df,...
+        'edgecolor','none');
+    title('Driving force')
+    xlabel('X')
+    ylabel('Y')
+    colorbar
+    caxis([0e3 150e3]);
+    colormap(gca, Cmap/255.0)
+    view(2)
+    axis equal
 
-% load institute_antiflow/vel_profiles_paul.mat
- load vel_profiles_paul_gl_str_2022.mat
+    % load institute_antiflow/vel_profiles_paul.mat
+     load vel_profiles_paul_gl_str_2022.mat
 
-[um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
+    [um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
 
-figure
+    figure
 
-AF1 = load("data/AntiFlow2_4.mat");
-[antiflow_x, antiflow_y] = ll2ps(profile_lat(:,2),profile_lon(:,2));
+    AF1 = load("data/AntiFlow2_4.mat");
+    [antiflow_x, antiflow_y] = ll2ps(profile_lat(:,2),profile_lon(:,2));
 
-subplot(221)
-trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(u.^2 + v.^2)*3.154E7),...
-       'edgecolor','none')   
-caxis([0.3323  381.5379])
-hold on
-plot(antiflow_x,antiflow_y,'r','linewidth',3)
-title('Speed Model')
-xlabel('X')
-ylabel('Y')
-colorbar
-f = gca;
-f.ColorScale = 'log';
-view(2)
-axis equal
+    subplot(221)
+    trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(u.^2 + v.^2)*3.154E7),...
+           'edgecolor','none')   
+    caxis([0.3323  381.5379])
+    hold on
+    plot(antiflow_x,antiflow_y,'r','linewidth',3)
+    title('Speed Model')
+    xlabel('X')
+    ylabel('Y')
+    colorbar
+    f = gca;
+    f.ColorScale = 'log';
+    view(2)
+    axis equal
 
-subplot(222)
-trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(um.^2 + vm.^2)),...
-       'edgecolor','none')   
-caxis([0.3323  381.5379])
-hold on
-plot(antiflow_x,antiflow_y,'r','linewidth',3)
-title('Speed MEaSUREs')
-xlabel('X')
-ylabel('Y')
-colorbar
-f = gca;
-f.ColorScale = 'log';
-view(2)
-axis equal
+    subplot(222)
+    trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(um.^2 + vm.^2)),...
+           'edgecolor','none')   
+    caxis([0.3323  381.5379])
+    hold on
+    plot(antiflow_x,antiflow_y,'r','linewidth',3)
+    title('Speed MEaSUREs')
+    xlabel('X')
+    ylabel('Y')
+    colorbar
+    f = gca;
+    f.ColorScale = 'log';
+    view(2)
+    axis equal
 
-spd_interp = scatteredInterpolant(xy(:,1),xy(:,2),(sqrt(u.^2 + v.^2)*3.154E7));
+    spd_interp = scatteredInterpolant(xy(:,1),xy(:,2),(sqrt(u.^2 + v.^2)*3.154E7));
 
-subplot(212)
-plot(profile_path(:,2)-30.5E3,profile_cross(:,2),'LineWidth',3)
-hold on
-plot(profile_path(:,2)-30.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
-plot(AF1.xy(AF1.xy(:,2) > 1500-AF1.dx/10,1),AF1.u(AF1.xy(:,2) > 1500-AF1.dx/10),'LineWidth',3)
-legend('MEaSUREs','MapView Model','AntiFlow Model','Location','NorthWest')
-xlim([-30E3,80E3])
-ylabel('[m/yr]')
-xlabel('[m]')
-figure
+    subplot(212)
+    plot(profile_path(:,2)-30.5E3,profile_cross(:,2),'LineWidth',3)
+    hold on
+    plot(profile_path(:,2)-30.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
+    plot(AF1.xy(AF1.xy(:,2) > 1500-AF1.dx/10,1),AF1.u(AF1.xy(:,2) > 1500-AF1.dx/10),'LineWidth',3)
+    legend('MEaSUREs','MapView Model','AntiFlow Model','Location','NorthWest')
+    xlim([-30E3,80E3])
+    ylabel('[m/yr]')
+    xlabel('[m]')
+    figure
 
-AF1 = load("data/AntiFlow2022_3_4.mat");
-[antiflow_x, antiflow_y] = ll2ps(profile_lat(:,3),profile_lon(:,3));
-subplot(221)
-trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(u.^2 + v.^2)*3.154E7),...
-       'edgecolor','none')   
-caxis([0.3323  381.5379])
-hold on
-plot(antiflow_x,antiflow_y,'r','linewidth',3)
-title('Speed Model')
-xlabel('X')
-ylabel('Y')
-colorbar
-f = gca;
-f.ColorScale = 'log';
-view(2)
-axis equal
+    AF1 = load("data/AntiFlow2022_3_4.mat");
+    [antiflow_x, antiflow_y] = ll2ps(profile_lat(:,3),profile_lon(:,3));
+    subplot(221)
+    trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(u.^2 + v.^2)*3.154E7),...
+           'edgecolor','none')   
+    caxis([0.3323  381.5379])
+    hold on
+    plot(antiflow_x,antiflow_y,'r','linewidth',3)
+    title('Speed Model')
+    xlabel('X')
+    ylabel('Y')
+    colorbar
+    f = gca;
+    f.ColorScale = 'log';
+    view(2)
+    axis equal
 
-subplot(222)
-trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(um.^2 + vm.^2)),...
-       'edgecolor','none')   
-caxis([0.3323  381.5379])
-hold on
-plot(antiflow_x,antiflow_y,'r','linewidth',3)
-title('Speed MEaSUREs')
-xlabel('X')
-ylabel('Y')
-colorbar
-f = gca;
-f.ColorScale = 'log';
-view(2)
-axis equal
+    subplot(222)
+    trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(um.^2 + vm.^2)),...
+           'edgecolor','none')   
+    caxis([0.3323  381.5379])
+    hold on
+    plot(antiflow_x,antiflow_y,'r','linewidth',3)
+    title('Speed MEaSUREs')
+    xlabel('X')
+    ylabel('Y')
+    colorbar
+    f = gca;
+    f.ColorScale = 'log';
+    view(2)
+    axis equal
 
-spd_interp = scatteredInterpolant(xy(:,1),xy(:,2),(sqrt(u.^2 + v.^2)*3.154E7));
+    spd_interp = scatteredInterpolant(xy(:,1),xy(:,2),(sqrt(u.^2 + v.^2)*3.154E7));
 
-subplot(212)
-plot(profile_path(:,3)-52.5E3,profile_cross(:,3),'LineWidth',3)
-hold on
-plot(profile_path(:,3)-52.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
-plot(AF1.xy(AF1.xy(:,2) > 1500-AF1.dx/10,1),AF1.u(AF1.xy(:,2) > 1500-AF1.dx/10),'LineWidth',3)
-legend('MEaSUREs','MapView Model','AntiFlow Model','Location','NorthWest')
-xlim([-30E3,80E3])
-ylabel('[m/yr]')
-xlabel('[m]')
+    subplot(212)
+    plot(profile_path(:,3)-52.5E3,profile_cross(:,3),'LineWidth',3)
+    hold on
+    plot(profile_path(:,3)-52.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
+    plot(AF1.xy(AF1.xy(:,2) > 1500-AF1.dx/10,1),AF1.u(AF1.xy(:,2) > 1500-AF1.dx/10),'LineWidth',3)
+    legend('MEaSUREs','MapView Model','AntiFlow Model','Location','NorthWest')
+    xlim([-30E3,80E3])
+    ylabel('[m/yr]')
+    xlabel('[m]')
 
-[um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
-figure
-trisurf(t,xy(:,1),xy(:,2),tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2),...
-       'edgecolor','none')
-title('Basal Strength');
-caxis([0 1e5])
-view(2)
-colorbar
+    [um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
+    figure
+    trisurf(t,xy(:,1),xy(:,2),tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2),...
+           'edgecolor','none')
+    title('Basal Strength');
+    caxis([0 1e5])
+    view(2)
+    colorbar
+end

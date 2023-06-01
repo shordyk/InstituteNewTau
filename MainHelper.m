@@ -18,9 +18,16 @@ clc
 addpath('lib') 
 addpath('grid') 
 
+if(~ismac)
+    % Start-up business on sherlock is hard. You must have a MATLAB folder and 
+    % startup.m script to get everything set up. Duplicate this from your local 
+    addpath('lib') 
+    addpath ../MATLAB/
+    run startup.m
+end
+
 % Name of scenarios to run, only 1 map file used here.
 nameToRun = ["ISSM"];
-% mapsToRun = ["gridInstitute26000.mat"];
 mapsToRun = ["strainMesh035.mat"];
 for j = 1:length(mapsToRun)
     for i = 1:length(nameToRun)
