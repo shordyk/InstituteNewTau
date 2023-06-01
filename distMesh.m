@@ -3,8 +3,8 @@ close all
 if(~ismac)
     %Start-up business on sherlock is hard 
     addpath('lib') 
-    addpath(genpath('/home/groups/jsuckale/psummers/MATLAB'))
-    run /home/groups/jsuckale/psummers/MATLAB/startup.m
+    addpath ../MATLAB
+    run startup.m
 end
 % Institute box
 xbox = [-10.00  -9.25   -8.25   -9.00   -10.00]*1e5;
@@ -199,5 +199,13 @@ if(ismac)
 	colorbar   
 end
 
-save("grid/strainMesh" + strrep(string(edgeLength),"0.","") + ".mat");
+try
+    save("grid/strainMesh" + strrep(string(edgeLength),"0.","") + ".mat");
+catch
+    %% The grid folder might not exist first time running this
+    warning("Error saving, grid directory might be missing. Making one now.")
+    mkdir grid
+    save("grid/strainMesh" + strrep(string(edgeLength),"0.","") + ".mat");
+end
+
 disp("Successfully Saved")
