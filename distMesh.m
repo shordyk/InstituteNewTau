@@ -1,6 +1,6 @@
 clear
 close all
-if(~ismac)
+if(isunix)
     %Start-up business on sherlock is hard 
     addpath('lib') 
     addpath ../MATLAB
@@ -61,7 +61,7 @@ disp("inital mesh complete")
 [xx,yy] = meshgrid(xmin:1e3:xmax,ymin:1e3:ymax);
 spd = measures_interp('speed',xx,yy);
 
-if(ismac)
+if(~isunix)
     figure
     surf(xx,yy,zeros(size(spd)),log10(spd),'edgecolor','none')
     hold on 
@@ -79,7 +79,7 @@ if(sum(isnan(u)) + sum(isnan(v)) > 0)
     clear uFill vFill
 end
 
-if(ismac)
+if(~isunix)
 	figure
 	trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),sqrt(u.^2+v.^2),...
 	       'edgecolor','none')  
@@ -121,7 +121,7 @@ end
 
 fun =@(x,y) min(subplus(log(ep(x*1e5,y*1e5))+9),5);
 
-if(ismac)
+if(~isunix)
 	figure
 	scatter(xy(:,1),xy(:,2),[],fun(xy(:,1)/1e5,xy(:,2)/1e5),'filled')
 	colorbar
@@ -171,7 +171,7 @@ nw_bound = (ybox(2)-ybox(1))/(xbox(2)-xbox(1))*xy(:,1) - xy(:,2)  < (ybox(2)-ybo
 sw_bound = (ybox(1)-ybox(4))/(xbox(1)-xbox(4))*xy(:,1) - xy(:,2)  > (ybox(1)-ybox(4))/(xbox(1)-xbox(4))*xbox(4) - ybox(4)-dx/3;
 
 
-if(ismac)
+if(~isunix)
     figure(2)
     clf
     scatter(xy(:,1),xy(:,2),'k.')
@@ -186,7 +186,7 @@ if(ismac)
     scatter(xy(se_bound,1),xy(se_bound,2),'b*')
 end
 %%
-if(ismac)
+if(~isunix)
 	figure
 	clear u
 	u = measures_interp('speed',xy(:,1),xy(:,2));

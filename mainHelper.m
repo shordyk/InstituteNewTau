@@ -18,7 +18,7 @@ clc
 addpath('lib') 
 addpath('grid') 
 
-if(~ismac)
+if(isunix)
     % Start-up business on sherlock is hard. You must have a MATLAB folder and 
     % startup.m script to get everything set up. Duplicate this from your local 
     addpath('lib') 
@@ -34,6 +34,6 @@ for j = 1:length(mapsToRun)
         clearvars -except nameToRun mapsToRun i j
         str = nameToRun(i);
         mapFile = mapsToRun(j);
-        ModelRunner;
+        modelRunner;
     end
 end
