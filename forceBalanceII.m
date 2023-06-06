@@ -2,7 +2,7 @@
 clear; close all
 addpath lib
 load Dawn.mat
-load vel_profiles_paul_gl.mat
+% load vel_profiles_paul_gl.mat  %antiflow line tracks
 
 icey = cbrewer('div','BrBG',48);
 rho = 917;
@@ -298,32 +298,32 @@ setFontSize(16)
 % c.Label.String = '[%]';
 % 
 % setFontSize(16)
-%% 
-figure(4)
-load gridInstitute24000.mat
-clf
-subplot(211)
-surf(Xi,Yi,zeros(size(ss)),log10(spd2),'edgecolor', 'none');
-hold on 
-plot(xy(dwnSt_bound == 1,1),xy(dwnSt_bound == 1,2),'k','linewidth',2)
-plot(xy(upSt_bound == 1,1),xy(upSt_bound == 1,2),'k','linewidth',2)
-plot(xy(rtSt_bound == 1,1),xy(rtSt_bound == 1,2),'k','linewidth',2)
-plot(xy(lfSt_bound == 1,1),xy(lfSt_bound == 1,2),'k','linewidth',2)
-bedmachine('gl','k','linewidth',2)
-xx = linspace(-1044e3, -841e3,50);
-yy = linspace(305e3, 235e3,50);
-plot(xx,yy,'r-')
-title('Domain')
-view(2)
-axis equal
-setFontSize(16);
-c = colorbar;
-c.Label.String = 'Log_{10} Speed [m/yr]';
-
-subplot(212)
-bedmachine_profile(xx,yy)
-clear xx yy
-setFontSize(16)
+% %% 
+% figure(4)
+% load grid/strainMesh035.mat
+% clf
+% subplot(211)
+% surf(Xi,Yi,zeros(size(ss)),log10(spd2),'edgecolor', 'none');
+% hold on 
+% plot(xy(dwnSt_bound == 1,1),xy(dwnSt_bound == 1,2),'k','linewidth',2)
+% plot(xy(upSt_bound == 1,1),xy(upSt_bound == 1,2),'k','linewidth',2)
+% plot(xy(rtSt_bound == 1,1),xy(rtSt_bound == 1,2),'k','linewidth',2)
+% plot(xy(lfSt_bound == 1,1),xy(lfSt_bound == 1,2),'k','linewidth',2)
+% bedmachine('gl','k','linewidth',2)
+% xx = linspace(-1044e3, -841e3,50);
+% yy = linspace(305e3, 235e3,50);
+% plot(xx,yy,'r-')
+% title('Domain')
+% view(2)
+% axis equal
+% setFontSize(16);
+% c = colorbar;
+% c.Label.String = 'Log_{10} Speed [m/yr]';
+% 
+% subplot(212)
+% bedmachine_profile(xx,yy)
+% clear xx yy
+% setFontSize(16)
 %%
 figure(5)
 clf
