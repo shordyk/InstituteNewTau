@@ -34,6 +34,6 @@ for j = 1:length(mapsToRun)
         clearvars -except nameToRun mapsToRun i j
         str = nameToRun(i);
         mapFile = mapsToRun(j);
-        ModelRunner;
+        modelRunner;
     end
 end
