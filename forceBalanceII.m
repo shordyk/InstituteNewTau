@@ -1,4 +1,6 @@
-% Mapping strain and driving force for institute methods of Van Der Veen 1989
+% Mapping strain and driving force for Institute Ice Stream
+% methods of Van Der Veen 1989, also some other plotting to get to know the
+% area
 clear; close all
 addpath lib
 load Dawn.mat
@@ -122,7 +124,7 @@ spd2 = spd2 .* mask;
 
 u_int = 2 / 4 *abs(bed).^3 .* h * A * 3.154e7;
 %%
-figure(1)
+figure
 clf
 ax(1) = subplot(121);
 p = surf(Xi,Yi,zeros(size(ss)),log10(spd2));
@@ -130,7 +132,7 @@ hold on
 utmp = cos(angs);
 vtmp = sin(angs);
 % quiver(Xi,Yi,utmp,vtmp)
-title('Ice Speed')
+title('Ice Surface Speed')
 set(p, 'edgecolor', 'none');
 view(2)
 axis equal
@@ -156,26 +158,26 @@ c = colorbar;
 c.Label.String = 'Bed Elevation [m]';
 
 %%
-figure(2)
+figure
 clf
-ax(1) = subplot(121);
-p = surf(Xi,Yi,zeros(size(phi_raw)),phi_raw);
-hold on
-contour(xi,yi,spd2, [10, 10] , 'k:','HandleVisibility','off')
-contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
-contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
-contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
-title('Hydro Potential (hydroequalib assumption)')
-set(p, 'edgecolor', 'none');
-colormap(ax(1),'jet');
-caxis([0 700])
-view(2)
-axis equal
-setFontSize(16);
-c = colorbar;
-c.Label.String = '\Phi [?]';
-
-ax(2) = subplot(122);
+% ax(1) = subplot(121);
+% p = surf(Xi,Yi,zeros(size(phi_raw)),phi_raw);
+% hold on
+% contour(xi,yi,spd2, [10, 10] , 'k:','HandleVisibility','off')
+% contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
+% contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
+% contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+% title('Hydro Potential (hydroequalib assumption)')
+% set(p, 'edgecolor', 'none');
+% colormap(ax(1),'jet');
+% caxis([0 700])
+% view(2)
+% axis equal
+% setFontSize(16);
+% c = colorbar;
+% c.Label.String = '\Phi [?]';
+% 
+% ax(2) = subplot(122);
 [phi_x, phi_y] = gradient(phi,dx,dx);
 [b_x, b_y] = gradient(b,dx,dx);
 sp = 3;
@@ -184,23 +186,28 @@ hold on
 set(p, 'edgecolor', 'none');
 quiver(xi(1:sp:end),yi(1:sp:end),-phi_x(1:sp:end,1:sp:end),-phi_y(1:sp:end,1:sp:end));
 quiver(xi(1:sp:end),yi(1:sp:end),-b_x(1:sp:end,1:sp:end),-b_y(1:sp:end,1:sp:end));
+bedmachine('gl','color',rgb('gray'),'linewidth',2)
 contour(xi,yi,spd2, [10, 10] , 'k:','HandleVisibility','off')
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
+
 hold off
 colorbar
-colormap(ax(2),flipud(pink))
+% colormap(ax(2),flipud(pink))
+colormap(flipud(pink))
 caxis([0 .01])
-title('Gradients')
-legend('|\nabla \Phi|','\nabla \Phi','\nabla Bed')
+title('Gradients of Bed and Hydropotential \Phi at Bed')
+legend('|\nabla \Phi|','\nabla \Phi','\nabla Bed','grounding line')
 view(2)
 axis equal
 setFontSize(16);
+xlim([-1.2e6 -.7e6]);
+ylim([-1e5 5e5]);
 
 
 
 %% 
-figure(3)
+figure
 clf
 sgtitle('Force Budget (Positive is Along Flow)')
 colormap redblue
@@ -211,7 +218,7 @@ hold on
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
-bedmachine('gl','c-','linewidth',2)
+bedmachine('gl','color',rgb('gray'),'linewidth',2)
 title('Driving Force')
 allfig2(p,dr)
 
@@ -221,7 +228,7 @@ hold on
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
-bedmachine('gl','c-','linewidth',2)
+bedmachine('gl','color',rgb('gray'),'linewidth',2)
 title('Longitudinal Stresses')
 allfig2(p,lon)
 
@@ -231,7 +238,7 @@ hold on
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
-bedmachine('gl','c-','linewidth',2)
+bedmachine('gl','color',rgb('gray'),'linewidth',2)
 title('Lateral Stresses')
 allfig2(p,lat)
 
@@ -242,90 +249,47 @@ hold on
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
-bedmachine('gl','c-','linewidth',2)
+bedmachine('gl','color',rgb('gray'),'linewidth',2)
 allfig2(p,bed)
 
 setFontSize(16)
+
 %% 
-% figure(3)
-% clf
-% sgtitle('Force Budget Fraction (Positive is Along Flow)')
-% colormap redblue
-% caxis([-1e5 1e5])
-% subplot(221)
-% p = surf(Xi,Yi,zeros(size(ss)),dr);
-% hold on
-% contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
-% contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
-% contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
-% title('Driving Force')
-% allfig(p)
-% 
-% subplot(222)
-% p = surf(Xi,Yi,zeros(size(ss)),lon./dr);
-% hold on
-% contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
-% contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
-% contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
-% title('Longitudinal Stresses')
-% allfig(p)
-% caxis([-1, 1])
-% c = colorbar;
-% c.Label.String = '[%]';
-% 
-% subplot(223)
-% p = surf(Xi,Yi,zeros(size(ss)),lat./dr);
-% hold on
-% contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
-% contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
-% contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
-% title('Lateral Stresses')
-% allfig(p)
-% caxis([-1, 1])
-% c = colorbar;
-% c.Label.String = '[%]';
-% 
-% subplot(224)
-% p = surf(Xi,Yi,zeros(size(ss)),bed./dr);
-% title('Bed Drag')
-% hold on
-% contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
-% contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
-% contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
-% allfig(p)
-% caxis([-1, 1])
-% c = colorbar;
-% c.Label.String = '[%]';
-% 
-% setFontSize(16)
-% %% 
-% figure(4)
-% load grid/strainMesh035.mat
-% clf
-% subplot(211)
-% surf(Xi,Yi,zeros(size(ss)),log10(spd2),'edgecolor', 'none');
-% hold on 
-% plot(xy(dwnSt_bound == 1,1),xy(dwnSt_bound == 1,2),'k','linewidth',2)
-% plot(xy(upSt_bound == 1,1),xy(upSt_bound == 1,2),'k','linewidth',2)
-% plot(xy(rtSt_bound == 1,1),xy(rtSt_bound == 1,2),'k','linewidth',2)
-% plot(xy(lfSt_bound == 1,1),xy(lfSt_bound == 1,2),'k','linewidth',2)
-% bedmachine('gl','k','linewidth',2)
-% xx = linspace(-1044e3, -841e3,50);
-% yy = linspace(305e3, 235e3,50);
-% plot(xx,yy,'r-')
-% title('Domain')
-% view(2)
-% axis equal
-% setFontSize(16);
-% c = colorbar;
-% c.Label.String = 'Log_{10} Speed [m/yr]';
-% 
-% subplot(212)
-% bedmachine_profile(xx,yy)
-% clear xx yy
-% setFontSize(16)
+
+try
+    grd = load("grid/strainMesh035.mat");
+    fileLoad = true;
+catch
+    fileLoad = false;
+    warning('grid file not found, skipping plot')
+end
+
+if(fileLoad)
+    figure
+    contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
+    hold on
+    contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
+    contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+    surf(Xi,Yi,-1*ones(size(spd2)),log10(spd2),'edgecolor', 'none');
+    caxis([-.9 2.8]);
+    plot(grd.xy(grd.nw_bound == 1,1),grd.xy(grd.nw_bound == 1,2),'k','linewidth',2)
+    plot(grd.xy(grd.ne_bound == 1,1),grd.xy(grd.ne_bound == 1,2),'k','linewidth',2)
+    plot(grd.xy(grd.se_bound == 1,1),grd.xy(grd.se_bound == 1,2),'k','linewidth',2)
+    plot(grd.xy(grd.sw_bound == 1,1),grd.xy(grd.sw_bound == 1,2),'k','linewidth',2)
+%     contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
+%     contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
+%     contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
+    bedmachine('gl','color',rgb('gray'),'linewidth',2)
+    title('Domain')
+    view(2)
+    axis equal
+    setFontSize(16);
+    c = colorbar;
+    c.Label.String = 'Log_{10} Speed [m/yr]';
+end
+
 %%
-figure(5)
+figure %same as before, but larger plot
 clf
 colormap redblue
 p = surf(Xi,Yi,zeros(size(ss)),lat);
@@ -334,18 +298,18 @@ contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
 title('Lateral Stresses')
-bedmachine('gl','k','linewidth',2)
+bedmachine('gl','color',rgb('grey'),'linewidth',2)
 allfig2(p,lat)
-
+setFontSize(20);
 %%
 
-figure(6)
+figure
 clf
 p = surf(Xi,Yi,b_raw,(spd2));
 hold on
 set(p, 'edgecolor', 'none');
 p = surf(Xi,Yi,sf_raw,(spd2),'facealpha',0.75);
-title('Elevation')
+title('3D plot Elevation of ice surface and bed')
 set(p, 'edgecolor', 'none');
 colormap(parula);
 % caxis([-2000 2000])
@@ -358,42 +322,45 @@ f.ColorScale = 'log';
 set(p, 'edgecolor', 'none');
 %%
 
-figure(7)
+figure
 clf
 
-p = surf(Xi,Yi,sf_raw,(spd2),'facealpha',1);
+p = surf(Xi,Yi,sf_raw,(spd2),'facealpha',.8);
 hold on
-contour3(Xi,Yi,sf_raw,[-1000:100:2000],'-','color',rgb('gray'))
+contour3(Xi,Yi,sf_raw,[-1000:100:2000],'-','color',rgb('white'))
 contour3(Xi,Yi,sf_raw,[-1000:500:2000],'k-')
-title('Elevation')
+bedmachine('gl','color',rgb('gray'),'linewidth',2)
+title('Elevation of Surface and Contours')
 set(p, 'edgecolor', 'none');
 colormap(parula);
-% caxis([-2000 2000])
-% axis equal
 setFontSize(16);
 c = colorbar;
 c.Label.String = 'Ice Surface Speed [m/yr]';
 f = gca;
 f.ColorScale = 'log';
 set(p, 'edgecolor', 'none');
+view(2)
 
 %%
-figure(8)
+figure
 clf
-subplot(121)
+ax(1) = subplot(121);
 p = surf(Xi,Yi,zeros(size(ss)),u_int);
-title('Vertical Creep (Idealized)')
+title('Internal Flow (Idealized)')
 hold on
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
 allfig2(p,u_int)
+colormap(ax(1),cmocean('tempo'))
 caxis([0 100])
 c = colorbar;
 c.Label.String = '[m/yr]';
+setFontSize(16);
 
 
-subplot(122)
+
+ax(2) = subplot(122);
 p = surf(Xi,Yi,zeros(size(ss)),(abs(u_int)./spd2*100));
 title('Internal Creep Factor')
 hold on
@@ -402,14 +369,17 @@ contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
 allfig2(p,u_int./spd2*100)
 c = colorbar;
+colormap(ax(2),cmocean('tempo'))
 caxis([0,100]);
 c.Label.String = '[%]';
 f = gca;
 f.ColorScale = 'linear';
+setFontSize(16);
+
 %%
-figure(9)
+figure
 clf
-p = surf(Xi,Yi,zeros(size(ss)),h);
+p = surf(Xi,Yi,zeros(size(h)),h);
 title('Thickness')
 hold on
 contour(xi,yi,spd2, [10, 10] , 'k:','HandleVisibility','off')
@@ -420,17 +390,18 @@ allfig2(p,h)
 c = colorbar;
 c.Label.String = '[m]';
 caxis([0 3000])
+setFontSize(16);
 %%
-figure(10)
+figure
 clf
-p = contourf(Xi,Yi,imgaussfilt(b_raw,3),10);
+surf(Xi,Yi,zeros(size(b_raw)),b_raw,'edgecolor','none');
 hold on
 contour(xi,yi,spd2, [10, 10] , 'k:','HandleVisibility','off')
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
 title('Bed elevation')
-colormap(ax(2),icey);
+colormap(flipud(cmocean('turbid')));
 caxis([-2000 500])
 view(2)
 axis equal
@@ -438,48 +409,45 @@ setFontSize(16);
 c = colorbar;
 c.Label.String = 'Bed Elevation [m]';
 
+%%
 figure
 p = surf(Xi,Yi,zeros(size(ss)),sqrt(sx.^2+sy.^2));
 hold on
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
-[C,h] = contour(xi,yi,sqrt(sx.^2+sy.^2), [1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1], 'r-','HandleVisibility','off');  
-clabel(C,h)
-title('Surface Slope')
-[profile_x, profile_y] = ll2ps(profile_lat,profile_lon);
-plot(profile_x, profile_y,'k','linewidth',3)
-bedmachine('gl','k','linewidth',2)
+[C,hh] = contour(xi,yi,sqrt(sx.^2+sy.^2), [1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1], 'r-','HandleVisibility','off');  
+clabel(C,hh)
+title('Surface Slope, a part of driving stress')
+bedmachine('gl','color',rgb('gray'),'linewidth',2)
 f = gca;
 f.ColorScale = 'log';
 view(2)
 colorbar
 set(p, 'edgecolor', 'none');
 caxis([1e-6 1e-2])
+setFontSize(16);
 
+%%
 figure
-p = surf(Xi,Yi,zeros(size(ss)),measures_interp('err',Xi,Yi)./measures_interp('speed',Xi,Yi),...
+surf(Xi,Yi,zeros(size(ss)),measures_interp('err',Xi,Yi)./measures_interp('speed',Xi,Yi),...
     'edgecolor', 'none');
 hold on
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
 contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
-[profile_x, profile_y] = ll2ps(profile_lat,profile_lon);
-plot(profile_x, profile_y,'k','linewidth',3)
 view(2)
 f = gca;
-f.ColorScale = 'log';
+f.ColorScale = 'linear';
+colormap(cmocean('amp'));
 caxis([0 1])
 colorbar
 title('Percent error in speed')
-
-figure
-plot(profile_path,measures_interp('err',profile_x,profile_y)./measures_interp('speed',profile_x,profile_y))
-legend
+setFontSize(16);
 
 %%
-figure
-h = sf-b;
+figure 
+% from Paul's preprints, was cut from final publication so don't over read into this
 p = surf(Xi,Yi,zeros(size(ss)),h./(sqrt(sx.^2+sy.^2)*200e3));
 hold on
 contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
@@ -487,16 +455,16 @@ contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
 [C,hh] = contour(xi,yi,h./(sqrt(sx.^2+sy.^2)*200e3),[.1,.3,1,3,10], 'r-','HandleVisibility','off');  
 clabel(C,hh)
-title('perterbation factor')
+title('Perterbation Factor')
 bedmachine('gl','k','linewidth',2)
-colormap redblue
+colormap(cmocean('curl'))
 f = gca;
 f.ColorScale = 'log';
 view(2)
 colorbar
 set(p, 'edgecolor', 'none');
 caxis([1e-1 1e1])
-
+setFontSize(16);
 
 
 function [] = allfig(p)

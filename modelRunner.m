@@ -127,7 +127,15 @@ end
 %% Save data to data file
 clear fg1 fg2
 mpClean = erase(mapFile, [".mat"]);
-save("data/data_" + mpClean + str + "noAdvect.mat");
+try
+   save("data/data_" + mpClean + str + "noAdvect.mat");
+catch
+    % The data folder might not exist first time running this
+    warning("Error saving, data directory might be missing. Making one now.")
+    mkdir data
+    save("data/data_" + mpClean + str + ".mat");
+end
+
 
 %% Vis out of loop
 if(ismac)
