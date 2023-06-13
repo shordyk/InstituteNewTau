@@ -120,7 +120,7 @@ for t_i = 1:100
     % u and v are [m/s]    
     %% Visualization in loop 
     %(uncomment to see avg temp, enhancement, and Pe, Lambda, Br every loop
-    if(ismac)
+    if(ismac | ispc)
         inLoopPlotting;
     end
 end
@@ -138,7 +138,7 @@ end
 
 
 %% Vis out of loop
-if(ismac)
+if(ismac | ispc)
     spd2 = measures_interp('speed',xy(:,1),xy(:,2)); %[m/yr]
 
     figure('Position', [0 0 1200 600]);
