@@ -60,23 +60,24 @@ smoothsurf(smoothbed > smoothsurf) = smoothbed(smoothbed > smoothsurf) + 1; %Pe 
 
 %% Build bed and surf, correct for thinning and floatation
 h_real =@(x,y) interp2(xi,yi,bm_s-bm_b,x,y);
-rock_mask =@(x,y) interp2(xi,yi,rock,x,y,'nearest');
+% rock_mask =@(x,y) interp2(xi,yi,rock,x,y,'nearest');
 h_b_init =@(x,y) interp2(xi,yi,smoothbed,x,y);
 h_s_init =@(x,y) interp2(xi,yi,smoothsurf,x,y);
-phi_init =@(x,y) rho/rho_w*h_s_init(x,y) + (rho_w-rho)/rho_w*h_b_init(x,y); %hydropotential per unit water weight
+% phi_init =@(x,y) rho/rho_w*h_s_init(x,y) + (rho_w-rho)/rho_w*h_b_init(x,y); %hydropotential per unit water weight
 clear bm_b bm_s;
 h = subplus(h_s_init(xy(:,1),xy(:,2)) - h_b_init(xy(:,1),xy(:,2))); %h: smoothed ice thickness [m]
 h_re = subplus(h_real(xy(:,1),xy(:,2))); % non-smoothed ice thickness [m]
 
-%% Define a few globals vars
-phi_max = max(max(phi_init(xy(:,1),xy(:,2))));
-phi_min = min(min(phi_init(xy(:,1),xy(:,2))));
+% %% Define a few globals vars
+% phi_max = max(max(phi_init(xy(:,1),xy(:,2))));
+% phi_min = min(min(phi_init(xy(:,1),xy(:,2))));
 
 %% Mask Between rock/sed (0 is rock, 1 is sed)
 
 rockSed = double(Yi > -(Xi + 5e5)/1.7); %divide between rock/sed midstream
-rockSed2 = heaviside(Yi + (Xi + 5e5)/1.7);
+% rockSed2 = heaviside(Yi + (Xi + 5e5)/1.7);
 rockSedMask = griddedInterpolant(Xi',Yi',rockSed','nearest');   
+clear rockSed;
 
 %% Create vectors of bed/surface for numerical solving
 h_s = h_s_init(xy(:,1),xy(:,2));

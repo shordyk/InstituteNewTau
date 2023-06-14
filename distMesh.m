@@ -1,6 +1,6 @@
 clear
 close all
-if(~ismac)
+if(~ismac && ~ispc)
     %Start-up business on sherlock is hard 
     addpath('lib') 
     addpath ../MATLAB

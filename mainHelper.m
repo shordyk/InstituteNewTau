@@ -18,7 +18,7 @@ clc
 addpath('lib') 
 addpath('grid') 
 
-if(~ismac)
+if(~ismac && ~ispc)
     % Start-up business on sherlock is hard. You must have a MATLAB folder and 
     % startup.m script to get everything set up. Duplicate this from your local 
     addpath('lib') 
@@ -29,9 +29,11 @@ end
 % Name of scenarios to run, only 1 map file used here.
 nameToRun = ["ISSM"];
 mapsToRun = ["strainMesh035.mat"];
+config    = defaultConfig();
+
 for j = 1:length(mapsToRun)
     for i = 1:length(nameToRun)
-        clearvars -except nameToRun mapsToRun i j
+        clearvars -except nameToRun mapsToRun i j config
         str = nameToRun(i);
         mapFile = mapsToRun(j);
         modelRunner;

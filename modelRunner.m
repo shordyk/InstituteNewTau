@@ -11,13 +11,8 @@
 % close all
 
 %% Initialization
-% Scenario to run if running one at a time comment out below, run this file
-% directly
 
-% str = 'XXX';
-% mapFile = 'XXX.mat';
-
-% Comment so we know what's happening, thats always nice.
+% Display so we know what's happening, thats always nice.
 disp("Running " + str + " now...");
 
 % Load input files
@@ -79,7 +74,7 @@ for t_i = 1:100
     if(t_i == 1)
         enhance = e_new;
     end
-
+    
     if(t_i ~= 1) %first step we don't relax, we use E = 1 everywhere (zero strain is also an options)
         enhance = (1-nu) * enhance + nu*e_new;
         res = norm(e_new - enhance) / norm(e_new);
@@ -117,28 +112,40 @@ for t_i = 1:100
             break;
         end
     end
+    
+    if(~config.thermocouple)
+        break; %allow for non-coupled running
+    end
     % u and v are [m/s]    
     %% Visualization in loop 
     %(uncomment to see avg temp, enhancement, and Pe, Lambda, Br every loop
-    if(ismac)
+    if(config.plotFigs)
         inLoopPlotting;
     end
 end
 %% Save data to data file
-clear fg1 fg2
+clear fg1 fg2 Acc T_s %Clear large files before save, not needed so cleared
 mpClean = erase(mapFile, [".mat"]);
-try
-   save("data/data_" + mpClean + str + "noAdvect.mat");
-catch
-    % The data folder might not exist first time running this
-    warning("Error saving, data directory might be missing. Making one now.")
-    mkdir data
-    save("data/data_" + mpClean + str + ".mat");
+
+if(config.saveData)
+    if(contains(cvx_status,"Solved"))
+        try
+           save("data/data_" + mpClean + str + "noAdvect.mat");
+        catch
+            % The data folder might not exist first time running this
+            warning("Error saving, data directory might be missing. Making one now.")
+            mkdir data
+            save("data/data_" + mpClean + str + ".mat");
+        end
+    else
+         warning('Data not being saved, CVX never solved')
+    end
+else
+    warning('Data not being saved, saveData = false')
 end
 
-
 %% Vis out of loop
-if(ismac)
+if(config.plotFigs)
     spd2 = measures_interp('speed',xy(:,1),xy(:,2)); %[m/yr]
 
     figure('Position', [0 0 1200 600]);
@@ -200,102 +207,108 @@ if(ismac)
     axis equal
 
     % load institute_antiflow/vel_profiles_paul.mat
-     load vel_profiles_paul_gl_str_2022.mat
+    try
+        load vel_profiles_paul_gl_str_2022.mat
+    
+        [um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
+    
+        figure
+        AF1 = load("data/AntiFlow2_4.mat");
+        [antiflow_x, antiflow_y] = ll2ps(profile_lat(:,2),profile_lon(:,2));
 
-    [um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
+        subplot(221)
+        trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(u.^2 + v.^2)*3.154E7),...
+               'edgecolor','none')   
+        caxis([0.3323  381.5379])
+        hold on
+        plot(antiflow_x,antiflow_y,'r','linewidth',3)
+        title('Speed Model')
+        xlabel('X')
+        ylabel('Y')
+        colorbar
+        f = gca;
+        f.ColorScale = 'log';
+        view(2)
+        axis equal
 
-    figure
+        subplot(222)
+        trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(um.^2 + vm.^2)),...
+               'edgecolor','none')   
+        caxis([0.3323  381.5379])
+        hold on
+        plot(antiflow_x,antiflow_y,'r','linewidth',3)
+        title('Speed MEaSUREs')
+        xlabel('X')
+        ylabel('Y')
+        colorbar
+        f = gca;
+        f.ColorScale = 'log';
+        view(2)
+        axis equal
 
-    AF1 = load("data/AntiFlow2_4.mat");
-    [antiflow_x, antiflow_y] = ll2ps(profile_lat(:,2),profile_lon(:,2));
+        spd_interp = scatteredInterpolant(xy(:,1),xy(:,2),(sqrt(u.^2 + v.^2)*3.154E7));
 
-    subplot(221)
-    trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(u.^2 + v.^2)*3.154E7),...
-           'edgecolor','none')   
-    caxis([0.3323  381.5379])
-    hold on
-    plot(antiflow_x,antiflow_y,'r','linewidth',3)
-    title('Speed Model')
-    xlabel('X')
-    ylabel('Y')
-    colorbar
-    f = gca;
-    f.ColorScale = 'log';
-    view(2)
-    axis equal
+        subplot(212)
+        plot(profile_path(:,2)-30.5E3,profile_cross(:,2),'LineWidth',3)
+        hold on
+        plot(profile_path(:,2)-30.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
+        plot(AF1.xy(AF1.xy(:,2) > 1500-AF1.dx/10,1),AF1.u(AF1.xy(:,2) > 1500-AF1.dx/10),'LineWidth',3)
+        legend('MEaSUREs','MapView Model','AntiFlow Model','Location','NorthWest')
+        xlim([-30E3,80E3])
+        ylabel('[m/yr]')
+        xlabel('[m]')
+        figure
+    catch
+        warning("vel_profiles_paul_gl_str_2022.mat or data/AntiFlow2_4.mat did not load")
+    end
+    
+    try
+        AF1 = load("data/AntiFlow2022_3_4.mat");
+        [antiflow_x, antiflow_y] = ll2ps(profile_lat(:,3),profile_lon(:,3));
+        subplot(221)
+        trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(u.^2 + v.^2)*3.154E7),...
+               'edgecolor','none')   
+        caxis([0.3323  381.5379])
+        hold on
+        plot(antiflow_x,antiflow_y,'r','linewidth',3)
+        title('Speed Model')
+        xlabel('X')
+        ylabel('Y')
+        colorbar
+        f = gca;
+        f.ColorScale = 'log';
+        view(2)
+        axis equal
 
-    subplot(222)
-    trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(um.^2 + vm.^2)),...
-           'edgecolor','none')   
-    caxis([0.3323  381.5379])
-    hold on
-    plot(antiflow_x,antiflow_y,'r','linewidth',3)
-    title('Speed MEaSUREs')
-    xlabel('X')
-    ylabel('Y')
-    colorbar
-    f = gca;
-    f.ColorScale = 'log';
-    view(2)
-    axis equal
+        subplot(222)
+        trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(um.^2 + vm.^2)),...
+               'edgecolor','none')   
+        caxis([0.3323  381.5379])
+        hold on
+        plot(antiflow_x,antiflow_y,'r','linewidth',3)
+        title('Speed MEaSUREs')
+        xlabel('X')
+        ylabel('Y')
+        colorbar
+        f = gca;
+        f.ColorScale = 'log';
+        view(2)
+        axis equal
 
-    spd_interp = scatteredInterpolant(xy(:,1),xy(:,2),(sqrt(u.^2 + v.^2)*3.154E7));
+        spd_interp = scatteredInterpolant(xy(:,1),xy(:,2),(sqrt(u.^2 + v.^2)*3.154E7));
 
-    subplot(212)
-    plot(profile_path(:,2)-30.5E3,profile_cross(:,2),'LineWidth',3)
-    hold on
-    plot(profile_path(:,2)-30.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
-    plot(AF1.xy(AF1.xy(:,2) > 1500-AF1.dx/10,1),AF1.u(AF1.xy(:,2) > 1500-AF1.dx/10),'LineWidth',3)
-    legend('MEaSUREs','MapView Model','AntiFlow Model','Location','NorthWest')
-    xlim([-30E3,80E3])
-    ylabel('[m/yr]')
-    xlabel('[m]')
-    figure
-
-    AF1 = load("data/AntiFlow2022_3_4.mat");
-    [antiflow_x, antiflow_y] = ll2ps(profile_lat(:,3),profile_lon(:,3));
-    subplot(221)
-    trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(u.^2 + v.^2)*3.154E7),...
-           'edgecolor','none')   
-    caxis([0.3323  381.5379])
-    hold on
-    plot(antiflow_x,antiflow_y,'r','linewidth',3)
-    title('Speed Model')
-    xlabel('X')
-    ylabel('Y')
-    colorbar
-    f = gca;
-    f.ColorScale = 'log';
-    view(2)
-    axis equal
-
-    subplot(222)
-    trisurf(t,xy(:,1),xy(:,2),zeros(size(xy(:,1))),(sqrt(um.^2 + vm.^2)),...
-           'edgecolor','none')   
-    caxis([0.3323  381.5379])
-    hold on
-    plot(antiflow_x,antiflow_y,'r','linewidth',3)
-    title('Speed MEaSUREs')
-    xlabel('X')
-    ylabel('Y')
-    colorbar
-    f = gca;
-    f.ColorScale = 'log';
-    view(2)
-    axis equal
-
-    spd_interp = scatteredInterpolant(xy(:,1),xy(:,2),(sqrt(u.^2 + v.^2)*3.154E7));
-
-    subplot(212)
-    plot(profile_path(:,3)-52.5E3,profile_cross(:,3),'LineWidth',3)
-    hold on
-    plot(profile_path(:,3)-52.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
-    plot(AF1.xy(AF1.xy(:,2) > 1500-AF1.dx/10,1),AF1.u(AF1.xy(:,2) > 1500-AF1.dx/10),'LineWidth',3)
-    legend('MEaSUREs','MapView Model','AntiFlow Model','Location','NorthWest')
-    xlim([-30E3,80E3])
-    ylabel('[m/yr]')
-    xlabel('[m]')
-
+        subplot(212)
+        plot(profile_path(:,3)-52.5E3,profile_cross(:,3),'LineWidth',3)
+        hold on
+        plot(profile_path(:,3)-52.5E3,spd_interp(antiflow_x,antiflow_y),'LineWidth',3)
+        plot(AF1.xy(AF1.xy(:,2) > 1500-AF1.dx/10,1),AF1.u(AF1.xy(:,2) > 1500-AF1.dx/10),'LineWidth',3)
+        legend('MEaSUREs','MapView Model','AntiFlow Model','Location','NorthWest')
+        xlim([-30E3,80E3])
+        ylabel('[m/yr]')
+        xlabel('[m]')
+    catch
+        warning("data/AntiFlow2022_3_4.mat didn't load")
+    end
     [um,vm] = measures_interp('velocity',xy(:,1),xy(:,2));
     figure
     trisurf(t,xy(:,1),xy(:,2),tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2),...
