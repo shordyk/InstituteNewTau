@@ -1,7 +1,7 @@
 % Mapping strain and driving force for Institute Ice Stream
 % methods of Van Der Veen 1989, also some other plotting to get to know the
 % area
-clear; close all
+clear; close all; 
 addpath lib
 load Dawn.mat
 % load vel_profiles_paul_gl.mat  %antiflow line tracks

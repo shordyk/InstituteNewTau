@@ -92,6 +92,7 @@ for t_i = 1:100
     
     % Options include     cvx_precision low, cvx_begin quiet
     % CVX may throw a warning about non-empty problems here, that is OK.
+    % quiet option supresses CVX output
     cvx_begin quiet
         variables u(nN) v(nN)
         obj = 2.*a./p.*sum(enhance.*h_av.*tau_area.*pow_pos(norms([A*u,B*v,1/2*(B*u+A*v)],2,2),p)) + ...

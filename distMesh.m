@@ -136,7 +136,7 @@ fd=@(p) dpoly(p,pv/1e5);
 % fh=@(p) 10-log(measures_interp('speed',p(:,1)*1e5,p(:,2)*1e5)+1);
 fh=@(p) ones(size(p,1),1) - fun(p(:,1),p(:,2))/6;
 
-edgeLength = .035;
+edgeLength = .05;
 
 [xy,t]=distmesh2d(fd,fh,edgeLength,[xmin,ymin;xmax,ymax]/1e5,[]);
 disp("Successfully meshed at " + edgeLength);

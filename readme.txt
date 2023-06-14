@@ -29,4 +29,4 @@ Output:
 Running "MainHelper.m" as configured now will produce basic figures for viewing the observed ice speed, computed ice speed, computed basal strength, and observed driving force. This will also save data files of the outputs in the data/ directory.
 
 Limitations:
-This code currently will not behave well on a Windows machine. It currently is designed to run on a Mac machine, or a linux server (like Sherlock). 
+It currently is designed to run on a Mac/PC machine, or a linux server (like Sherlock) but plotting is disabled on linux. 
