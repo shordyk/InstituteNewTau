@@ -2,12 +2,15 @@
 
 mkdir ~/Documents/
 mkdir ~/Documents/MATLAB
-mkdir ~/Documents/MATLAB/ISSM/
+mkdir ~/Documents/MATLAB/ISSM
 
 cd ~/Documents/MATLAB/ISSM/
-wget https://zenodo.org/record/2651652/files/README.txt
+curl https://zenodo.org/record/2651652/files/README.txt --output README.txt
 
-wget https://zenodo.org/record/2651652/files/JPL1_ISSM_init.zip
-wget https://zenodo.org/record/2651652/files/JPL1_ISSM_ctrl.zip
+curl https://zenodo.org/record/2651652/files/JPL1_ISSM_init.zip --output JPL1_ISSM_init.zip
+curl https://zenodo.org/record/2651652/files/JPL1_ISSM_ctrl.zip --output JPL1_ISSM_ctrl.zip
 
-unzip *.zip
+unzip JPL1_ISSM_init.zip
+unzip JPL1_ISSM_ctrl.zip
+
+rm *.zip

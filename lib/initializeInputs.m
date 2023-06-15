@@ -1,5 +1,12 @@
 % Used to initialize the input files for main runner
 
+%% Confirm that ISMIP data is downloaded, otherwise downloads and unpacks
+if(exist("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc",'file')~=2)
+    warning('Missing initMIP data, downloading now');
+    system('bash lib/downloadIsMipData.sh');
+    disp('Download Finished') ;
+end
+
 %% Color Packages
 load Dawn.mat;
 icey = cbrewer('div','BrBG',48);
