@@ -33,4 +33,14 @@ contour(X_small,Y_small,spd,[30,30],'k--')
 contour(X_small,Y_small,spd,[100,300],'k-')
 contour(X_small,Y_small,spd,[1000,1000],'k-','linewidth',2)
 colorbar
+title('Basal Strength')
 view(2)
+
+
+figure(3)
+%surf(X_small,Y_small,zeros(size(X_small)),spd,20,'edgecolor','none')
+contourf(X_small,Y_small,spd,'LineColor', 'none')
+%set(gca,'YDir','normal')
+title('Speed of Measures')
+colorbar
+
