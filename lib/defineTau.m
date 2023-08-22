@@ -195,14 +195,35 @@ elseif(str == "Mixed_east")  % also from https://tc.copernicus.org/articles/13/1
     else 
         scale = 1.1963; %adjustment factor, can't escape it
     end
-    warning('off','MATLAB:imagesci:netcdf:fillValueTypeMismatch'); % try not to warn here
+   
     xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
     yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-    tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
-    warning('on','MATLAB:imagesci:netcdf:fillValueTypeMismatch');
-    [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
-    uB = griddedInterpolant(xx,yy,tau(:,:,21));
+    %-------------------sam edits--------------
+
+    %tau = importdata('newtau5.mat');
+    %CVX want's things in double
+
+    taunew = load("newtaurotpre36.mat");
+    tau1 = double(taunew.newtaubase);
+    %tau = fliplr(tau1);
+    tau = permute(tau1, [3 2 1]);
+
+    %-------------------sam edits--------------
     
+    %tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+    
+    [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
+
+    disp(size(xx));
+    disp(size(yy));
+    disp(size(tau(:,:,1)));
+    uB = griddedInterpolant(xx,yy,squeeze(tau(:,:,21)));
+
+    imagesc(xi,yi,tau(401:423,255:277,21))
+    set(gca,'YDir','normal')
+    colorbar
+
+   
     tau_c = @(x,y,u,v) norms([u,v],2,2) .*... %Plastic
         subplus(uB(x,y))*scale;
     elseif(str == "ISSM_center")  % from https://tc.copernicus.org/articles/13/1441/2019/tc-13-1441-2019.html

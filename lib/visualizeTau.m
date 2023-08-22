@@ -1,18 +1,21 @@
 clear
 close all
 
-warning('off','MATLAB:imagesci:netcdf:fillValueTypeMismatch'); % try not to warn here
+
 xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
 yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
-warning('on','MATLAB:imagesci:netcdf:fillValueTypeMismatch'); 
-[xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
 
-tau_interp = griddedInterpolant(xx,yy,tau(:,:,21));
+taunew = load("newtaurotpre2.mat");
+tau = double(taunew.newtaubase);
+[xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
+%tau = flipud(tau1);
+tau = permute(tau, [3 2 1]);
+
+tau_interp = griddedInterpolant(xx,yy,squeeze(tau(:,:,21)));
 
 %%
 figure(1)
-imagesc(xi,yi,tau(:,:,21)')
+imagesc(xi,yi,tau(401:423,255:277,21))
 set(gca,'YDir','normal')
 colorbar
 
