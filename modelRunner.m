@@ -49,8 +49,11 @@ for t_i = 1:100
         Pe =@(x,y) rho*C_p.*Acc(x,y).*subplus(h_s_init(x,y)-h_b_init(x,y))./K;
 
         % Horizontal Peclet number  [ ]
-%         La =@(x,y) lambda(x,y).*subplus(h_s_init(x,y)-h_b_init(x,y)).^2./(K*(T_m-T_s(x,y)));
-        La =@(x,y) zeros(size(x)); %exclude advection
+%       La =@(x,y) lambda(x,y).*subplus(h_s_init(x,y)-h_b_init(x,y)).^2./(K*(T_m-T_s(x,y)));
+        %La =@(x,y) zeros(size(x)); %exclude advection
+        
+        La =@(x,y) 2*subplus(h_s_init(x,y)-h_b_init(x,y)).^2./(K*(T_m-T_s(x,y))).*((subplus(ep_dot(x,y)).^(nn+1))/A_m).^(1/nn);
+        %advection - half brinkman
         
         % Critical Strain [s^-1]
         ep_star =@(x,y) ((La(x,y)/2 + ((Pe(x,y).^2)/2)./(Pe(x,y)-1+exp(-Pe(x,y))))).^(nn/(nn+1))...
@@ -133,12 +136,12 @@ mpClean = erase(mapFile, [".mat"]);
 if(config.saveData)
     if(contains(cvx_status,"Solved"))
         try
-           save("data/data_" + mpClean + str + "noAdvect.mat");
+           save("samrun/data_" + mpClean + str + "yesAdvectNewBase.mat");
         catch
             % The data folder might not exist first time running this
             warning("Error saving, data directory might be missing. Making one now.")
-            mkdir data
-            save("data/data_" + mpClean + str + ".mat");
+            mkdir samrun
+            save("samrun/data_" + mpClean + str + ".mat");
         end
     else
          warning('Data not being saved, CVX never solved')

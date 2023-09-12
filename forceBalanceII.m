@@ -1,5 +1,5 @@
 % Mapping strain and driving force for Institute Ice Stream
-% methods of Van Der Veen 1989, also some other plotting to get to know the
+% methods of    , also some other plotting to get to know the
 % area
 clear; close all; 
 addpath lib
@@ -204,9 +204,21 @@ setFontSize(16);
 xlim([-1.2e6 -.7e6]);
 ylim([-1e5 5e5]);
 
+%%
+% lat and long are 301x251 double
+% xi is 251 double
+% yi is 301 double so lat[y,x]
+%for i = 1:length(xi)
+   % for j = 1:length(xi)
 
 
-%% 
+%figure
+
+
+
+%%
+% C is contour matrix
+% for first contour coordinates, use C(1,:)
 figure
 clf
 sgtitle('Force Budget (Positive is Along Flow)')
@@ -215,8 +227,10 @@ caxis([-1e5 1e5])
 subplot(221)
 p = surf(Xi,Yi,zeros(size(ss)),dr);
 hold on
-contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
-contour(xi,yi,spd2, [100, 300, 3000] , 'k-','HandleVisibility','off')
+[C30, H30] = contour(xi,yi,spd2, [30, 30] , 'k--','HandleVisibility','off')
+[C100,H] = contour(xi,yi,spd2, [100, 100] , 'k-','HandleVisibility','off');
+[C300, H3] = contour(xi,yi,spd2, [300, 300] , 'k-','HandleVisibility','off');
+[C3000, H1] = contour(xi,yi,spd2, [3000, 3000] , 'k-','HandleVisibility','off');
 contour(xi,yi,spd2, [1000, 1000] , 'k-','LineWidth',2)
 bedmachine('gl','color',rgb('gray'),'linewidth',2)
 title('Driving Force')
@@ -254,8 +268,110 @@ allfig2(p,bed)
 
 setFontSize(16)
 
-%% 
+%% ---------- Sam Edits ---------
 
+%Contour line x and y values
+
+C100X = C100(1,2:C100(2,1));
+C100Y = C100(2,2:C100(2,1));
+[X100,Y100] = meshgrid(C100X, C100Y);
+
+
+%Making "along path" distance variable along contour line
+
+along_100 = zeros(size(C100X));
+for i = 2:length(C100X)
+    along_100(i) = along_100(i-1) + sqrt((C100X(i-1) - C100X(i))^2 + (C100Y(i-1) - C100Y(i))^2);
+end
+
+%disp(along_100)
+
+newlat = griddedInterpolant(Xi',Yi',lat');
+newlon = griddedInterpolant(Xi', Yi', lon');
+newbase = griddedInterpolant(Xi', Yi', bed'); 
+
+figure
+plot(C100X, C100Y, 'k-')
+%Looks good. 
+
+figure
+plot(along_100, newlat(C100X', C100Y'),'LineWidth',1.5)
+title('Force along along 100 spd contour')
+
+hold on 
+
+plot(along_100, newlon(C100X', C100Y'),'LineWidth',1.5)
+
+plot(along_100, newbase(C100X', C100Y'),'LineWidth',1.5)
+
+legend('Lateral Stresses', 'Longitudinal Stresses', 'Bed Drag')
+xlabel('Distance along the contour')
+ylabel('Force')
+hold off
+%% 
+C300X = C300(1,2:C300(2,1));
+C300Y = C300(2,2:C300(2,1));
+[X300,Y300] = meshgrid(C300X, C300Y);
+
+
+%Making "along path" distance variable along contour line
+
+along_300 = zeros(size(C300X));
+for i = 2:length(C300X)
+    along_300(i) = along_300(i-1) + sqrt((C300X(i-1) - C300X(i))^2 + (C300Y(i-1) - C300Y(i))^2);
+end
+
+
+figure
+plot(along_300, newlat(C300X', C300Y'),'LineWidth',1.5)
+title('Force along along 300 spd contour')
+
+
+hold on 
+
+plot(along_300, newlon(C300X', C300Y'),'LineWidth',1.5)
+
+plot(along_300, newbase(C300X', C300Y'),'LineWidth',1.5)
+
+legend('Lateral Stresses', 'Longitudinal Stresses', 'Bed Drag')
+xlabel('Distance along the contour')
+ylabel('Force')
+hold off
+
+%% 1000 Speed Contour
+
+C30X = C30(1,2:C30(2,1));
+C30Y = C30(2,2:C30(2,1));
+[X30,Y30] = meshgrid(C30X, C30Y);
+
+
+%Making "along path" distance variable along contour line
+
+along_30 = zeros(size(C30X));
+for i = 2:length(C30X)
+    along_30(i) = along_30(i-1) + sqrt((C30X(i-1) - C30X(i))^2 + (C30Y(i-1) - C30Y(i))^2);
+end
+
+
+figure
+plot(along_30, newlat(C30X', C30Y'),'LineWidth',1.5)
+title('Force along along 30 spd contour')
+
+
+hold on 
+
+plot(along_30, newlon(C30X', C30Y'),'LineWidth',1.5)
+
+plot(along_30, newbase(C30X', C30Y'),'LineWidth',1.5)
+
+xlabel('Distance along the contour')
+ylabel('Force')
+
+legend('Lateral Stresses', 'Longitudinal Stresses', 'Bed Drag')
+hold off
+
+
+%%
 try
     grd = load("grid/strainMesh035.mat");
     fileLoad = true;
