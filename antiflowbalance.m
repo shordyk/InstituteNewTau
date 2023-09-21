@@ -7,7 +7,7 @@ gen_vel_profiles(seed_lat, seed_lon,n);
 
 load vel_profiles_paul_04_13.mat
 
-% sam x and y from define tau 
+% same x and y from define tau 
 xi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
 yi   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
 [xx,yy] = ndgrid(xi - 3072000,yi - 3072000);
@@ -34,8 +34,6 @@ end
 
 %% Import basal values
 
-
-
 %tau = defineTau("ISSM_center_stream");
 tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
 
@@ -49,13 +47,54 @@ figure
 plot(along_1, tau_interp(x_line1, y_line1),'LineWidth',1.5)
 title('Basal Strength Along Anti-Flow Line')
 
+%% Calculate temp-dependent viscosity 
+
+%Importing results from mapview run. (u,v. t_bar is mean temp at (x,y)
+% Modeling some of my approach of forceBalance11
+
+load data_strainMesh035ISSMyesAdvectNewBase.mat
+
+g = 9.81;
+dx = 2e3;
+smth = 4e3;
+
+b_raw =  bedmachine_interp('bed',Xi,Yi);
+sf_raw =  bedmachine_interp('surface',Xi,Yi);
+b = imgaussfilt(b_raw,2);
+sf = imgaussfilt(sf_raw,smth/dx);
+
+
+[uu, vv] = ndgrid(u,v);
+
+% Gradients
+h = sf-b;
+[ux ,  uy] = gradient(uu,dx,dx);
+[vx ,  vy] = gradient(vv,dx,dx);
+[sx ,  sy] = gradient(sf,dx,dx);
+[spdx , spdy] = gradient(spd,dx,dx);
+[spdxx, spdxy] = gradient(spdx,dx,dx);
+[spdyx, spdyy] = gradient(spdy,dx,dx);
+
+% Driving Stress
+Tdx = -rho * g * h .* sx.^2;
+Tdy = -rho * g * h .* sy.^2;
+Td  = sqrt(Tdx.^2 +  Tdy.^2);
+
+% Viscosity
+
+
 %% Calculate longitudinal and lateral forces 
 
-% We need velocity and effective viscosity values across line
-% Calculate gravity term using some dx above and below the line
+
+
+vel = sqrt(u.^2 + v.^2);
+
+
+% Importing temperature field for effective viscosity - t_z ? but depth av?
 
 
 
+% Angle of incline at each point
 
 
 
