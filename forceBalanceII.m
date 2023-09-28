@@ -1,5 +1,5 @@
 % Mapping strain and driving force for Institute Ice Stream
-% methods of    , also some other plotting to get to know the
+% methods of Van der Veen , also some other plotting to get to know the
 % area
 clear; close all; 
 addpath lib
