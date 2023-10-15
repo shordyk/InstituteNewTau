@@ -10,12 +10,15 @@ load vel_profiles_paul_04_13.mat
 %% Import values
 
 %tau = defineTau("ISSM_center_stream");
-tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
-newtau = squeeze(tau(:,:,21));
+%tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
+%newtau = squeeze(tau(:,:,21));
+
+%
 
 % Get u,v and xy
 load data_strainMesh035ISSM_centeryesAdvectNewBase.mat
 
+%load data_strainMesh035ISSMyesAdvectNewBase.mat
 
 % same xy from define tau, this xy are only used to create tau interpolant
 xii   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
@@ -46,6 +49,9 @@ dx = 259.6;
 dy = 252.23 ;
 smth = 4e3;
 
+uinit = u;
+vinit = v;
+
 xi = min(xy(:,1))-dx:dx:max(xy(:,1))+dx;
 yi = (min(xy(:,2))-dy:dy:max(xy(:,2))+dy)';
 %xi = xy(:,1);
@@ -55,6 +61,8 @@ yi = (min(xy(:,2))-dy:dy:max(xy(:,2))+dy)';
 
 us = scatteredInterpolant(xy(:,1),xy(:,2),u);
 vs = scatteredInterpolant(xy(:,1),xy(:,2),v);
+
+enh = scatteredInterpolant(xy_c(:,1), xy_c(:,2), enhance);
 
 v = vs(xxx,yyy);
 u = us(xxx,yyy);
@@ -85,15 +93,22 @@ Tdx = -rho * g * h .* sx.^2;
 Tdy = -rho * g * h .* sy.^2;
 Td  = sqrt(Tdx.^2 +  Tdy.^2);
 
+
+% Trying instead to import tau from runs
+%tau_c = defineTau("ISSM");
+tau_c = defineTau("ISSM_center");
+newtau = tau_c(xy(:,1),xy(:,2),uinit,vinit)./norms([uinit,vinit],2,2);
+tau_interp = scatteredInterpolant(xy(:,1),xy(:,2),newtau);
+
+
+
 %% Calculate viscosity (use . when working with grad? comp?)
 % .* for multiplying corresponding components
 
 % Strain rate components
 
 eps_xx = ux;
-
 eps_yy = vy; 
-
 eps_xy = (.5*(uy + vx)).^2;
 
 % Effective strain rate
@@ -102,9 +117,10 @@ e_eff = sqrt(.5*(eps_xx.^2 + eps_yy.^2)+ eps_xy);
 [e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dx);
 
 % Will add "enhance" once this works
-
+taucheck = tau_interp(x_line1, y_line1);
 B = 1.6e8;
 A = 2.4e-25;
+E = enh(xxx,yyy);
 
 %% Calculate longitudinal and lateral forces 
 
@@ -129,11 +145,11 @@ for i = 2:length(xi)-1
         ss(j,i) = max([ui , vi] * R); %x speed in new ref frame
         dr(j,i) = -(vv(1)*sx(j,i) + vv(2)*sy(j,i))* rho * g * h(j,i); %Driving Force
         
-        lon(j,i) =  2*B*((vv(1)*sx(j,i) + vv(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i))...
+        lon(j,i) =  2*B*E(j,i)*((vv(1)*sx(j,i) + vv(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i))...
                     + h(j,i) .* (vv(1)*e_effx(j,i) + vv(2)*e_effy(j,i)) .* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i))...
-                    + h(j,i) .* e_eff(j,i).^(1/3-1) .* (spdxx(j,i).*vv(1).^2 + spdxy(j,i).*vv(1).*vv(2) + spdyx(j,i).*vv(1).*vv(2) + spdyy(j,i).*vv(2).^2));
+                    + h(j,i) .* e_eff(j,i).^(1/3-1) .* (spdxx(j,i).*vv(1).^2 + spdxy(j,i).*vv(1).*vv(2) + spdyx(j,i).*vv(1).*vv(2) + spdyy(j,i).*vv(2).^2))             ;
                 
-        lat(j,i) =  2*B*((vv_t(1)*sx(j,i) + vv_t(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i))...
+        lat(j,i) =  2*B*E(j,i)*((vv_t(1)*sx(j,i) + vv_t(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i))...
                     + h(j,i) .* (vv_t(1)*e_effx(j,i) + vv_t(2)*e_effy(j,i)) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i))...
                     + h(j,i) .* e_eff(j,i).^(1/3-1) .* (spdxx(j,i).*vv_t(1).^2 + spdxy(j,i).*vv_t(1).*vv_t(2) + spdyx(j,i).*vv_t(1).*vv_t(2) + spdyy(j,i).*vv_t(2).^2));
         angs(j,i) = ang;
@@ -151,7 +167,6 @@ end
 
 
 
-tau_interp = griddedInterpolant(Xii,Yii,newtau);
 
 %% Lat and Lon along line
 
@@ -159,24 +174,66 @@ lat_interp = griddedInterpolant(xxx,yyy,lat);
 
 lon_interp = griddedInterpolant(xxx,yyy,lon);
 
+%% Mapview Plots - need to edit
+
+figure
+clf
+sgtitle('Force Budget (Positive is Along Flow)')
+colormap redblue
+caxis([-1e5 1e5])
+subplot(221)
+p = surf(xxx,yyy,zeros(size(ss)),dr, "EdgeColor", "none");
+hold on
+%[C30, H30] = contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off');
+%[C100,H] = contour(xi,yi,spd, [100, 100] , 'k-','HandleVisibility','off');
+%[C300, H3] = contour(xi,yi,spd, [300, 300] , 'k-','HandleVisibility','off');
+%[C3000, H1] = contour(xi,yi,spd, [3000, 3000] , 'k-','HandleVisibility','off');
+contour(xi,yi,spd', [1000, 1000] , 'k-','LineWidth',2)
+bedmachine('gl','color',rgb('gray'),'linewidth',2)
+title('Driving Force')
+colorbar
+view(2)
+
+
+subplot(222)
+p = surf(xxx,yyy,zeros(size(ss)),lon, "EdgeColor", "none");
+hold on
+%contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off')
+%contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
+%contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
+bedmachine('gl','color',rgb('gray'),'linewidth',2)
+title('Longitudinal Stresses')
+colorbar
+view(2)
+
+subplot(223)
+p = surf(xxx,yyy,zeros(size(ss)),lat, "EdgeColor", "none");
+hold on
+%contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off')
+%contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
+%contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
+bedmachine('gl','color',rgb('gray'),'linewidth',2)
+title('Lateral Stresses')
+colorbar
+view(2)
+
 
 
 %% Plot basal values along line
 
 figure
-plot(along_1, tau_interp(x_line1, y_line1),'LineWidth',1.5)
-title('Basal Strength Along Anti-Flow Line')
+hold on
+plot(along_1, lat_interp(x_line1, y_line1),'LineWidth',1.5,'Color', 'g')
+plot(along_1, lon_interp(x_line1, y_line1),'LineWidth',1.5,'Color', 'b')
+plot(along_1, tau_interp(x_line1, y_line1),'LineWidth',1.5,'Color', 'r' )
+legend('Lateral Force', 'Longitudinal Force', 'Basal Drag')
+title('Force Balance Along Anti-Flow Line')
+hold off
 
 
 figure
-plot(along_1, lat_interp(x_line1, y_line1),'LineWidth',1.5)
-title('Lateral Strength Along Anti-Flow Line')
-
-figure
-plot(along_1, lon_interp(x_line1, y_line1),'LineWidth',1.5)
-title('Lon Strength Along Anti-Flow Line')
-
-
+plot(along_1, tau_interp(x_line1, y_line1),'LineWidth',1.5,'Color', 'r' )
+title('Basal Drag Along Anti-Flow Line')
 %%
 function gen_vel_profiles(seed_lat_in, seed_lon_in,n)
     seed_lat = seed_lat_in*ones(1,n)-.4*[-(n-1)/2:(n-1)/2];
