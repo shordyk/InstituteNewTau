@@ -1,10 +1,11 @@
 clear;
 
 [seed_lat, seed_lon] = ps2ll(-9.2212e5,2.5977e5);
-n = 3; % must be odd
-% gen_vel_profiles(seed_lat, seed_lon,n);
+% changed n to 1 from 3
+n = 1; % must be odd
+gen_vel_profiles(seed_lat, seed_lon,n);
 
-% load institute_antiflow/vel_profile_full.mat
+load vel_profiles_paul_04_13.mat
 % figure
 % measures('speed','institute ice stream','scalelim',[1 600],'mapwidth',800);
 % plotm(profile_lat,profile_lon,'k','LineWidth',3)
@@ -23,8 +24,8 @@ n = 3; % must be odd
 %     xlabel('Along-track Distance [km]')
 % end
 %%
-load vel_profiles_paul_gl_str_2022.mat
-figure
+load vel_profiles_paul_04_13.mat
+figure(1)
 mapzoomps('Institute Ice Stream');
 measuresps('speed')% [x,y,c] = measures_data('speed',xlim,ylim,'xy');
 plotps(profile_lat,profile_lon,'k','LineWidth',5)
@@ -35,13 +36,14 @@ hold on
 % plotm(seed_lat, seed_lon)
 bedmachine('surface','contour',0:50:1000,'k')
 bedmachine('gl','linewidth',3)
+xlabel('Contour Plot 1')
 caxis([1 1200]);
 set(gca,'ColorScale','log')
 load measuresColor.mat
 colormap(gca, measuresColor)
 colorbar
 %%
-figure
+figure(2)
 for j = 1:size(profile_path,2)
     subplot(2,size(profile_path,2),j)
     plot(profile_path(:,j)./1e3,profile_cross(:,j),profile_path(:,j)./1e3,profile_along(:,j),'LineWidth',3)
@@ -56,7 +58,7 @@ for j = 1:size(profile_path,2)
 end
 
 %%
-figure
+figure(3)
 mapzoomps('Institute Ice Stream');
 xx = xlim;
 yy = ylim;
@@ -71,6 +73,51 @@ bedmachine('gl','linewidth',3)
 title('Percent error in MEaSUREs speed')
 caxis([0 1])
 plotps(profile_lat,profile_lon,'k','LineWidth',5)
+
+%% Get x and y coordinates of main anti-flow line
+
+% for n=1, lateral and longitduinal coordinates are profile_lat / lon
+
+% Converting to x and y 
+
+[x_line1,y_line1] = ll2ps(profile_lat, profile_lon);
+
+
+
+%Making "along path" distance variable along contour line
+
+
+
+%disp(along_100)
+
+%newlat = griddedInterpolant(Xi',Yi',lat');
+%newlon = griddedInterpolant(Xi', Yi', lon');
+%newbase = griddedInterpolant(Xi', Yi', bed'); 
+
+figure(4)
+plot(x_line1, y_line1, 'k-')
+title('X and Y coord')
+
+
+%figure
+%plot(along_1, newlat(C100X', C100Y'),'LineWidth',1.5)
+%title('Force along along 100 spd contour')
+
+%% Create along-track coordinate
+
+along_1 = zeros(size(x_line1));
+for i = 2:length(x_line1)
+    along_1(i) = along_1(i-1) + sqrt((x_line1(i-1) - x_line1(i))^2 + (y_line1(i-1) - yline_1(i))^2);
+end
+
+%% Import basal values
+
+
+%% Plot basal values along line
+
+
+%% Calculate longitudinal and lateral forces 
+
 
 %%
 function gen_vel_profiles(seed_lat_in, seed_lon_in,n)
