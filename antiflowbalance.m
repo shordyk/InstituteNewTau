@@ -1,4 +1,6 @@
 clear;
+% Approach entirely based off Paul's forceBalance11, from Van der Veen
+
 
 [seed_lat, seed_lon] = ps2ll(-9.2212e5,2.5977e5);
 % changed n to 1 from 3
@@ -9,16 +11,8 @@ load vel_profiles_paul_04_13.mat
 
 %% Import values
 
-%tau = defineTau("ISSM_center_stream");
-%tau  = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_ctrl/strbasemag_AIS_JPL1_ISSM_ctrl.nc","strbasemag");
-%newtau = squeeze(tau(:,:,21));
-
-%
-
 % Get u,v and xy
 load data_strainMesh035ISSM_centeryesAdvectNewBase.mat
-
-%load data_strainMesh035ISSMyesAdvectNewBase.mat
 
 % same xy from define tau, this xy are only used to create tau interpolant
 xii   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
@@ -33,17 +27,12 @@ yii   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_
 % Converting to x and y 
 [x_line1,y_line1] = ll2ps(profile_lat, profile_lon);
 
-figure
-plot(x_line1, y_line1, 'k-')
-title('X and Y coord')
+%figure
+%plot(x_line1, y_line1, 'k-')
+%title('X and Y coord')
 %looks good
 
-
-%% Calculate temp-dependent viscosity 
-
-%Importing results from mapview run. (u,v. t_bar is mean temp at (x,y)
-% Modeling my approach off Paul's forceBalance11
-
+%% Constants and Grids 
 g = 9.81;
 dx = 259.6;
 dy = 252.23 ;
@@ -52,10 +41,9 @@ smth = 4e3;
 uinit = u;
 vinit = v;
 
+% Convert to square grid 
 xi = min(xy(:,1))-dx:dx:max(xy(:,1))+dx;
 yi = (min(xy(:,2))-dy:dy:max(xy(:,2))+dy)';
-%xi = xy(:,1);
-%yi = xy(:,2);
 [xxx,yyy] = ndgrid(xi,yi);
 [Xi,Yi] = meshgrid(xi,yi);
 
@@ -64,12 +52,25 @@ vs = scatteredInterpolant(xy(:,1),xy(:,2),v);
 
 enh = scatteredInterpolant(xy_c(:,1), xy_c(:,2), enhance);
 
+%v = vs(Xi,Yi);
+%u = us(Xi,Yi);
 v = vs(xxx,yyy);
 u = us(xxx,yyy);
 
-spd = sqrt(u.^2 + v.^2);
+% Model results are in meters/sec
+spd = (sqrt(u.^2 + v.^2)) *3.154E7;
 
-
+% Plotting speed to check that I haven't mishandled the grid
+figure
+p = surf(xxx,yyy,zeros(size(u)),spd);
+hold on 
+title('Ice Surface Speed')
+set(p, 'edgecolor', 'none');
+view(2)
+axis equal
+setFontSize(16);
+c = colorbar;
+c.Label.String = 'Speed [m/yr]';
 
 
 b_raw =  bedmachine_interp('bed',Xi,Yi);
@@ -93,36 +94,31 @@ Tdx = -rho * g * h .* sx.^2;
 Tdy = -rho * g * h .* sy.^2;
 Td  = sqrt(Tdx.^2 +  Tdy.^2);
 
-
-% Trying instead to import tau from runs
-%tau_c = defineTau("ISSM");
+% Tau
 tau_c = defineTau("ISSM_center");
 newtau = tau_c(xy(:,1),xy(:,2),uinit,vinit)./norms([uinit,vinit],2,2);
 tau_interp = scatteredInterpolant(xy(:,1),xy(:,2),newtau);
 
 
 
-%% Calculate viscosity (use . when working with grad? comp?)
+%% Calculate longitudinal and lateral forces 
 % .* for multiplying corresponding components
 
 % Strain rate components
-
 eps_xx = ux;
 eps_yy = vy; 
 eps_xy = (.5*(uy + vx)).^2;
 
 % Effective strain rate
-
 e_eff = sqrt(.5*(eps_xx.^2 + eps_yy.^2)+ eps_xy);
 [e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dx);
 
-% Will add "enhance" once this works
+% Will add "enhance" 
 taucheck = tau_interp(x_line1, y_line1);
 B = 1.6e8;
 A = 2.4e-25;
 E = enh(xxx,yyy);
 
-%% Calculate longitudinal and lateral forces 
 
 ss   = zeros(size(u));
 angs = zeros(size(u));
@@ -131,6 +127,7 @@ lon  = zeros(size(u));
 lat  = zeros(size(u));
 bed  = zeros(size(u));
 h = sf-b;
+
 for i = 2:length(xi)-1
     for j = 2:length(yi)-1
         ui = u(j,i);
@@ -145,15 +142,16 @@ for i = 2:length(xi)-1
         ss(j,i) = max([ui , vi] * R); %x speed in new ref frame
         dr(j,i) = -(vv(1)*sx(j,i) + vv(2)*sy(j,i))* rho * g * h(j,i); %Driving Force
         
-        lon(j,i) =  2*B*E(j,i)*((vv(1)*sx(j,i) + vv(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i))...
+        lon(j,i) =  2*B*((vv(1)*sx(j,i) + vv(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i))...
                     + h(j,i) .* (vv(1)*e_effx(j,i) + vv(2)*e_effy(j,i)) .* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i))...
                     + h(j,i) .* e_eff(j,i).^(1/3-1) .* (spdxx(j,i).*vv(1).^2 + spdxy(j,i).*vv(1).*vv(2) + spdyx(j,i).*vv(1).*vv(2) + spdyy(j,i).*vv(2).^2))             ;
                 
-        lat(j,i) =  2*B*E(j,i)*((vv_t(1)*sx(j,i) + vv_t(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i))...
+        lat(j,i) =  2*B*((vv_t(1)*sx(j,i) + vv_t(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i))...
                     + h(j,i) .* (vv_t(1)*e_effx(j,i) + vv_t(2)*e_effy(j,i)) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i))...
                     + h(j,i) .* e_eff(j,i).^(1/3-1) .* (spdxx(j,i).*vv_t(1).^2 + spdxy(j,i).*vv_t(1).*vv_t(2) + spdyx(j,i).*vv_t(1).*vv_t(2) + spdyy(j,i).*vv_t(2).^2));
         angs(j,i) = ang;
         
+        % Not using bed
         bed(j,i) = dr(j,i) + lat(j,i) + lon(j,i);
     end
 end
@@ -174,7 +172,7 @@ lat_interp = griddedInterpolant(xxx,yyy,lat);
 
 lon_interp = griddedInterpolant(xxx,yyy,lon);
 
-%% Mapview Plots - need to edit
+%% Mapview Plots
 
 figure
 clf
