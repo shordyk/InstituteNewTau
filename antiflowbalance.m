@@ -54,11 +54,11 @@ enh = scatteredInterpolant(xy_c(:,1), xy_c(:,2), enhance);
 
 %v = vs(Xi,Yi);
 %u = us(Xi,Yi);
-v = vs(xxx,yyy);
-u = us(xxx,yyy);
+v = vs(xxx,yyy)*3.154E7;
+u = us(xxx,yyy)*3.154E7;
 
 % Model results are in meters/sec
-spd = (sqrt(u.^2 + v.^2)) *3.154E7;
+spd = (sqrt(u.^2 + v.^2));
 
 % Plotting speed to check that I haven't mishandled the grid
 figure
@@ -81,12 +81,12 @@ sf = imgaussfilt(sf_raw,smth/dx);
 
 % Gradients
 h = sf-b;
-[ux ,  uy] = gradient(u,dx,dx);
-[vx ,  vy] = gradient(v,dx,dx);
-[sx ,  sy] = gradient(sf,dx,dx);
-[spdx , spdy] = gradient(spd,dx,dx);
-[spdxx, spdxy] = gradient(spdx,dx,dx);
-[spdyx, spdyy] = gradient(spdy,dx,dx);
+[ux ,  uy] = gradient(u,dx,dy);
+[vx ,  vy] = gradient(v,dx,dy);
+[sx ,  sy] = gradient(sf,dx,dy);
+[spdx , spdy] = gradient(spd,dx,dy);
+[spdxx, spdxy] = gradient(spdx,dx,dy);
+[spdyx, spdyy] = gradient(spdy,dx,dy);
 
 
 % Driving Stress
@@ -105,20 +105,42 @@ tau_interp = scatteredInterpolant(xy(:,1),xy(:,2),newtau);
 % .* for multiplying corresponding components
 
 % Strain rate components
-eps_xx = ux;
-eps_yy = vy; 
-eps_xy = (.5*(uy + vx)).^2;
+%eps_xx = ux;
+%eps_yy = vy; 
+%eps_xy = (.5*(uy + vx)).^2;
+%e_eff = sqrt(.5*(eps_xx.^2 + eps_yy.^2)+ eps_xy);
+%[e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dx);
 
-% Effective strain rate
-e_eff = sqrt(.5*(eps_xx.^2 + eps_yy.^2)+ eps_xy);
-[e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dx);
+
+
+% Effective strain rate - Paul
+
+[ux ,  uy] = gradient(u,dx,dx);
+[vx ,  vy] = gradient(v,dx,dx);
+
+e_eff = sqrt(.5*(ux.^2 + vy.^2) + (.5*(uy + vx)).^2);
+[e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dy);
+
+
+% Plottingto check
+figure
+p = surf(xxx,yyy,zeros(size(u)),e_eff);
+hold on 
+title('e_eff')
+set(p, 'edgecolor', 'none');
+view(2)
+axis equal
+setFontSize(16);
+c = colorbar;
+%c.Label.String = 'Speed [m/yr]';
+
 
 % Will add "enhance" 
 taucheck = tau_interp(x_line1, y_line1);
 B = 1.6e8;
 A = 2.4e-25;
 E = enh(xxx,yyy);
-
+[Ex ,  Ey] = gradient(E,dx,dy);
 
 ss   = zeros(size(u));
 angs = zeros(size(u));
@@ -142,13 +164,16 @@ for i = 2:length(xi)-1
         ss(j,i) = max([ui , vi] * R); %x speed in new ref frame
         dr(j,i) = -(vv(1)*sx(j,i) + vv(2)*sy(j,i))* rho * g * h(j,i); %Driving Force
         
-        lon(j,i) =  2*B*((vv(1)*sx(j,i) + vv(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i))...
-                    + h(j,i) .* (vv(1)*e_effx(j,i) + vv(2)*e_effy(j,i)) .* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i))...
-                    + h(j,i) .* e_eff(j,i).^(1/3-1) .* (spdxx(j,i).*vv(1).^2 + spdxy(j,i).*vv(1).*vv(2) + spdyx(j,i).*vv(1).*vv(2) + spdyy(j,i).*vv(2).^2))             ;
+        lon(j,i) =  2*B*(E(j,i)*(vv(1)*sx(j,i) + vv(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i))...
+                    + E(j,i)*h(j,i) .* (vv(1)*e_effx(j,i) + vv(2)*e_effy(j,i)) .* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i))...
+                    + E(j,i)*h(j,i) .* e_eff(j,i).^(1/3-1) .* (spdxx(j,i).*vv(1).^2 + spdxy(j,i).*vv(1).*vv(2) + spdyx(j,i).*vv(1).*vv(2) + spdyy(j,i).*vv(2).^2)...
+                    + h(j,i).* e_eff(j,i).^(1/3-1).* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i)) .* ( Ex(j,i)));
                 
-        lat(j,i) =  2*B*((vv_t(1)*sx(j,i) + vv_t(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i))...
-                    + h(j,i) .* (vv_t(1)*e_effx(j,i) + vv_t(2)*e_effy(j,i)) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i))...
-                    + h(j,i) .* e_eff(j,i).^(1/3-1) .* (spdxx(j,i).*vv_t(1).^2 + spdxy(j,i).*vv_t(1).*vv_t(2) + spdyx(j,i).*vv_t(1).*vv_t(2) + spdyy(j,i).*vv_t(2).^2));
+        lat(j,i) =  2*B*(E(j,i)*(vv_t(1)*sx(j,i) + vv_t(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i))...
+                    + E(j,i)*h(j,i) .* (vv_t(1)*e_effx(j,i) + vv_t(2)*e_effy(j,i)) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i))...
+                    + E(j,i)*h(j,i) .* e_eff(j,i).^(1/3-1) .* (spdxx(j,i).*vv_t(1).^2 + spdxy(j,i).*vv_t(1).*vv_t(2) + spdyx(j,i).*vv_t(1).*vv_t(2) + spdyy(j,i).*vv_t(2).^2) ...
+                    + h(j,i).* e_eff(j,i).^(1/3-1) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i)).*(Ex(j,i) + Ey(j,i)));
+        
         angs(j,i) = ang;
         
         % Not using bed
