@@ -21,6 +21,12 @@ ymax =  5e5;
 ymin =  -1e5;
 ss2   = zeros(size(uO));
 
+[oux ,  ouy] = gradient(uO,dx2,dx2);
+[ovx ,  ovy] = gradient(vO,dx2,dx2);
+
+oe_eff = sqrt(.5*(oux.^2 + ovy.^2) + (.5*(ouy + ovx)).^2);
+[oe_effx, oe_effy] = gradient(oe_eff.^(1/3-1),dx2,dx2);
+
 % Model speeds
 % Get u,v and xy
 load data_strainMesh035ISSM_centerPaulsBase.mat
@@ -37,13 +43,19 @@ us = scatteredInterpolant(xy(:,1),xy(:,2),u);
 vs = scatteredInterpolant(xy(:,1),xy(:,2),v);
 
 
-v = vs(Xi,Yi);
-u = us(Xi,Yi);
+v = vs(xxx,yyy)*3.154E7;
+u = us(xxx,yyy)*3.154E7;
 ss   = zeros(size(u));
-spd = sqrt(u.^2 + v.^2);
+spd = sqrt(u.^2 + v.^2);;
+
+[ux ,  uy] = gradient(u,dx,dx);
+[vx ,  vy] = gradient(v,dx,dx);
+
+e_eff = sqrt(.5*(ux.^2 + vy.^2) + (.5*(uy + vx)).^2);
+[e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dx);
 
 figure
-p = surf(Xi,Yi,zeros(size(ss)),spd);
+p = surf(xxx,yyy,zeros(size(ss)),spd);
 hold on 
 % quiver(Xi,Yi,utmp,vtmp)
 title('Ice Surface Speed - Model')
@@ -66,3 +78,24 @@ axis equal
 setFontSize(16);
 c = colorbar;
 c.Label.String = 'Speed [m/yr]';
+
+figure
+p = surf(xxx,yyy,zeros(size(ss)),e_eff);
+hold on 
+title('model e_eff')
+set(p, 'edgecolor', 'none');
+view(2)
+axis equal
+setFontSize(16);
+c = colorbar;
+
+figure
+p = surf(oXi,oYi,zeros(size(ss2)),oe_eff);
+hold on 
+title('obsv e_eff')
+set(p, 'edgecolor', 'none');
+view(2)
+axis equal
+setFontSize(16);
+c = colorbar;
+%c.Label.String = 'Speed [m/yr]';
