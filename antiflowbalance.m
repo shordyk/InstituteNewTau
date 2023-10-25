@@ -17,8 +17,7 @@ load data_strainMesh035ISSM_centeryesAdvectNewBase.mat
 % same xy from define tau, this xy are only used to create tau interpolant
 xii   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
 yii   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-[Xii, Yii] = ndgrid(xii, yii); 
-
+[Xii, Yii] = ndgrid(xii-307200, yii-307200); 
 
 
 %% Get x and y coordinates of main anti-flow line
@@ -35,8 +34,7 @@ yii   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_
 %% Constants and Grids 
 g = 9.81;
 dx = 259.6;
-%dy = 252.23 ;
-dy = 259.6;
+dy = 252.23 ;
 smth = 4e3;
 
 
@@ -96,7 +94,6 @@ Td  = sqrt(Tdx.^2 +  Tdy.^2);
 tau_c = defineTau("ISSM_center");
 newtau = tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2);
 tau_interp = scatteredInterpolant(xy(:,1),xy(:,2),newtau);
-
 
 
 %% Calculate longitudinal and lateral forces 
@@ -226,7 +223,33 @@ title('Lateral Stresses')
 colorbar
 view(2)
 
+subplot(224)
+p = surf(xxx,yyy,zeros(size(ss)),bed, "EdgeColor", "none");
+hold on
+%contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off')
+%contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
+%contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
+bedmachine('gl','color',rgb('gray'),'linewidth',2)
+title('Computed Basal Stresses')
+colorbar
+view(2)
 
+%% Plot tau 
+%tau_c = defineTau("ISSM_center");
+%newtau = tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2);
+%tau_interp = scatteredInterpolant(xy(:,1),xy(:,2),newtau);
+%tau_interp2 = scatteredInterpolant(xxx,yyy,);
+
+figure
+p = surf(xxx,yyy,zeros(size(ss)),tau_interp(xxx, yyy), "EdgeColor", "none");
+hold on
+%contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off')
+%contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
+%contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
+bedmachine('gl','color',rgb('gray'),'linewidth',2)
+title('Tau - ISSM Center')
+colorbar
+view(2)
 
 %% Plot basal values along line
 
