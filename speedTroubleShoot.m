@@ -43,13 +43,13 @@ us = scatteredInterpolant(xy(:,1),xy(:,2),u);
 vs = scatteredInterpolant(xy(:,1),xy(:,2),v);
 
 
-v = vs(xxx,yyy)*3.154E7;
-u = us(xxx,yyy)*3.154E7;
-ss   = zeros(size(u));
-spd = sqrt(u.^2 + v.^2);;
+vv = vs(xxx,yyy)*3.154E7;
+uu = us(xxx,yyy)*3.154E7;
+ss   = zeros(size(uu));
+spd = sqrt(uu.^2 + vv.^2);;
 
-[ux ,  uy] = gradient(u,dx,dx);
-[vx ,  vy] = gradient(v,dx,dx);
+[ux ,  uy] = gradient(uu,dx,dx);
+[vx ,  vy] = gradient(vv,dx,dx);
 
 e_eff = sqrt(.5*(ux.^2 + vy.^2) + (.5*(uy + vx)).^2);
 [e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dx);

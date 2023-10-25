@@ -35,17 +35,15 @@ yii   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_
 %% Constants and Grids 
 g = 9.81;
 dx = 259.6;
-dy = 252.23 ;
+%dy = 252.23 ;
+dy = 259.6;
 smth = 4e3;
 
-uinit = u;
-vinit = v;
 
 % Convert to square grid 
 xi = min(xy(:,1))-dx:dx:max(xy(:,1))+dx;
 yi = (min(xy(:,2))-dy:dy:max(xy(:,2))+dy)';
 [xxx,yyy] = ndgrid(xi,yi);
-[Xi,Yi] = meshgrid(xi,yi);
 
 us = scatteredInterpolant(xy(:,1),xy(:,2),u);
 vs = scatteredInterpolant(xy(:,1),xy(:,2),v);
@@ -54,15 +52,15 @@ enh = scatteredInterpolant(xy_c(:,1), xy_c(:,2), enhance);
 
 %v = vs(Xi,Yi);
 %u = us(Xi,Yi);
-v = vs(xxx,yyy)*3.154E7;
-u = us(xxx,yyy)*3.154E7;
+vv = vs(xxx,yyy)*3.154E7;
+uu = us(xxx,yyy)*3.154E7;
 
 % Model results are in meters/sec
-spd = (sqrt(u.^2 + v.^2));
+spd = (sqrt(uu.^2 + vv.^2));
 
 % Plotting speed to check that I haven't mishandled the grid
 figure
-p = surf(xxx,yyy,zeros(size(u)),spd);
+p = surf(xxx,yyy,zeros(size(uu)),spd);
 hold on 
 title('Ice Surface Speed')
 set(p, 'edgecolor', 'none');
@@ -72,17 +70,17 @@ setFontSize(16);
 c = colorbar;
 c.Label.String = 'Speed [m/yr]';
 
-
-b_raw =  bedmachine_interp('bed',Xi,Yi);
-sf_raw =  bedmachine_interp('surface',Xi,Yi);
+% changing to xxx 
+b_raw =  bedmachine_interp('bed',xxx,yyy);
+sf_raw =  bedmachine_interp('surface',xxx,yyy);
 b = imgaussfilt(b_raw,2);
 sf = imgaussfilt(sf_raw,smth/dx);
 
 
 % Gradients
 h = sf-b;
-[ux ,  uy] = gradient(u,dx,dy);
-[vx ,  vy] = gradient(v,dx,dy);
+[ux ,  uy] = gradient(uu,dx,dy);
+[vx ,  vy] = gradient(vv,dx,dy);
 [sx ,  sy] = gradient(sf,dx,dy);
 [spdx , spdy] = gradient(spd,dx,dy);
 [spdxx, spdxy] = gradient(spdx,dx,dy);
@@ -94,9 +92,9 @@ Tdx = -rho * g * h .* sx.^2;
 Tdy = -rho * g * h .* sy.^2;
 Td  = sqrt(Tdx.^2 +  Tdy.^2);
 
-% Tau
+% Tau, on square grid but only evaluate in plot
 tau_c = defineTau("ISSM_center");
-newtau = tau_c(xy(:,1),xy(:,2),uinit,vinit)./norms([uinit,vinit],2,2);
+newtau = tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2);
 tau_interp = scatteredInterpolant(xy(:,1),xy(:,2),newtau);
 
 
@@ -104,27 +102,15 @@ tau_interp = scatteredInterpolant(xy(:,1),xy(:,2),newtau);
 %% Calculate longitudinal and lateral forces 
 % .* for multiplying corresponding components
 
-% Strain rate components
-%eps_xx = ux;
-%eps_yy = vy; 
-%eps_xy = (.5*(uy + vx)).^2;
-%e_eff = sqrt(.5*(eps_xx.^2 + eps_yy.^2)+ eps_xy);
-%[e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dx);
-
-
 
 % Effective strain rate - Paul
-
-[ux ,  uy] = gradient(u,dx,dx);
-[vx ,  vy] = gradient(v,dx,dx);
-
 e_eff = sqrt(.5*(ux.^2 + vy.^2) + (.5*(uy + vx)).^2);
 [e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dy);
 
 
-% Plottingto check
+% Plotting to check
 figure
-p = surf(xxx,yyy,zeros(size(u)),e_eff);
+p = surf(xxx,yyy,zeros(size(uu)),e_eff);
 hold on 
 title('e_eff')
 set(p, 'edgecolor', 'none');
@@ -132,7 +118,7 @@ view(2)
 axis equal
 setFontSize(16);
 c = colorbar;
-%c.Label.String = 'Speed [m/yr]';
+
 
 
 % Will add "enhance" 
@@ -142,37 +128,37 @@ A = 2.4e-25;
 E = enh(xxx,yyy);
 [Ex ,  Ey] = gradient(E,dx,dy);
 
-ss   = zeros(size(u));
-angs = zeros(size(u));
-dr   = zeros(size(u));
-lon  = zeros(size(u));
-lat  = zeros(size(u));
-bed  = zeros(size(u));
+ss   = zeros(size(uu));
+angs = zeros(size(uu));
+dr   = zeros(size(uu));
+lon  = zeros(size(uu));
+lat  = zeros(size(uu));
+bed  = zeros(size(uu));
 h = sf-b;
 
 for i = 2:length(xi)-1
     for j = 2:length(yi)-1
-        ui = u(j,i);
-        vi = v(j,i);
+        ui = uu(j,i);
+        vi = vv(j,i);
         ang = atan(vi/ui);
         if(ui < 0) 
             ang = ang + pi;
         end
-        vv = [cos(ang), sin(ang)]; %Direction Vectors along flow
+        vvv = [cos(ang), sin(ang)]; %Direction Vectors along flow
         vv_t = [-sin(ang), cos(ang)];%Direction Vectors Perp to flow
         R = [ cos(ang) sin(-ang) ; sin(ang) cos(ang) ];
         ss(j,i) = max([ui , vi] * R); %x speed in new ref frame
-        dr(j,i) = -(vv(1)*sx(j,i) + vv(2)*sy(j,i))* rho * g * h(j,i); %Driving Force
+        dr(j,i) = -(vvv(1)*sx(j,i) + vvv(2)*sy(j,i))* rho * g * h(j,i); %Driving Force
         
-        lon(j,i) =  2*B*(E(j,i)*(vv(1)*sx(j,i) + vv(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i))...
-                    + E(j,i)*h(j,i) .* (vv(1)*e_effx(j,i) + vv(2)*e_effy(j,i)) .* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i))...
-                    + E(j,i)*h(j,i) .* e_eff(j,i).^(1/3-1) .* (spdxx(j,i).*vv(1).^2 + spdxy(j,i).*vv(1).*vv(2) + spdyx(j,i).*vv(1).*vv(2) + spdyy(j,i).*vv(2).^2)...
-                    + h(j,i).* e_eff(j,i).^(1/3-1).* (vv(1)*spdx(j,i) + vv(2)*spdy(j,i)) .* ( Ex(j,i)));
+        lon(j,i) =  2*B*(E(j,i)*(vvv(1)*sx(j,i) + vvv(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vvv(1)*spdx(j,i) + vvv(2)*spdy(j,i))...
+                    + E(j,i)*h(j,i) .* (vvv(1)*e_effx(j,i) + vvv(2)*e_effy(j,i)) .* (vvv(1)*spdx(j,i) + vvv(2)*spdy(j,i))...
+                    + E(j,i)*h(j,i) .* e_eff(j,i).^(1/3-1) .* (spdxx(j,i).*vvv(1).^2 + spdxy(j,i).*vvv(1).*vvv(2) + spdyx(j,i).*vvv(1).*vvv(2) + spdyy(j,i).*vvv(2).^2)...
+                    + h(j,i).* e_eff(j,i).^(1/3-1).* (vvv(1)*spdx(j,i) + vvv(2)*spdy(j,i)) .* (vvv(1)* Ex(j,i)) + vvv(2)*Ey(j,i));
                 
         lat(j,i) =  2*B*(E(j,i)*(vv_t(1)*sx(j,i) + vv_t(2)*sy(j,i)) .* e_eff(j,i).^(1/3-1) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i))...
                     + E(j,i)*h(j,i) .* (vv_t(1)*e_effx(j,i) + vv_t(2)*e_effy(j,i)) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i))...
                     + E(j,i)*h(j,i) .* e_eff(j,i).^(1/3-1) .* (spdxx(j,i).*vv_t(1).^2 + spdxy(j,i).*vv_t(1).*vv_t(2) + spdyx(j,i).*vv_t(1).*vv_t(2) + spdyy(j,i).*vv_t(2).^2) ...
-                    + h(j,i).* e_eff(j,i).^(1/3-1) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i)).*(Ex(j,i) + Ey(j,i)));
+                    + h(j,i).* e_eff(j,i).^(1/3-1) .* (vv_t(1)*spdx(j,i) + vv_t(2)*spdy(j,i)).*(vv_t(1)*Ex(j,i) + vv_t(2)*Ey(j,i)));
         
         angs(j,i) = ang;
         
