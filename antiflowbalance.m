@@ -38,15 +38,17 @@ dy = 252.23 ;
 smth = 4e3;
 
 
+
 % Convert to square grid 
 xi = min(xy(:,1))-dx:dx:max(xy(:,1))+dx;
-yi = (min(xy(:,2))-dy:dy:max(xy(:,2))+dy)';
+yi = (min(xy(:,2))-dy:dy:max(xy(:,2))+dy);
 [xxx,yyy] = ndgrid(xi,yi);
 
-us = scatteredInterpolant(xy(:,1),xy(:,2),u);
-vs = scatteredInterpolant(xy(:,1),xy(:,2),v);
+us = scatteredInterpolant(xy(:,1),xy(:,2),u, 'linear', 'none');
+vs = scatteredInterpolant(xy(:,1),xy(:,2),v, 'linear', 'none');
 
-enh = scatteredInterpolant(xy_c(:,1), xy_c(:,2), enhance);
+enh = scatteredInterpolant(xy_c(:,1), xy_c(:,2), enhance, 'linear', 'none');
+
 
 %v = vs(Xi,Yi);
 %u = us(Xi,Yi);
@@ -67,6 +69,7 @@ axis equal
 setFontSize(16);
 c = colorbar;
 c.Label.String = 'Speed [m/yr]';
+
 
 % changing to xxx 
 b_raw =  bedmachine_interp('bed',xxx,yyy);
@@ -110,6 +113,17 @@ figure
 p = surf(xxx,yyy,zeros(size(uu)),e_eff);
 hold on 
 title('e_eff')
+set(p, 'edgecolor', 'none');
+view(2)
+axis equal
+setFontSize(16);
+c = colorbar;
+
+
+figure
+p = surf(xxx,yyy,zeros(size(uu)),e_effx);
+hold on 
+title('e_effx')
 set(p, 'edgecolor', 'none');
 view(2)
 axis equal
@@ -235,10 +249,8 @@ colorbar
 view(2)
 
 %% Plot tau 
-%tau_c = defineTau("ISSM_center");
-%newtau = tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2);
-%tau_interp = scatteredInterpolant(xy(:,1),xy(:,2),newtau);
-%tau_interp2 = scatteredInterpolant(xxx,yyy,);
+
+
 
 figure
 p = surf(xxx,yyy,zeros(size(ss)),tau_interp(xxx, yyy), "EdgeColor", "none");
