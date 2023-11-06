@@ -49,27 +49,11 @@ vs = scatteredInterpolant(xy(:,1),xy(:,2),v, 'linear', 'none');
 
 enh = scatteredInterpolant(xy_c(:,1), xy_c(:,2), enhance, 'linear', 'none');
 
-
-%v = vs(Xi,Yi);
-%u = us(Xi,Yi);
 vv = vs(xxx,yyy)*3.154E7;
 uu = us(xxx,yyy)*3.154E7;
 
 % Model results are in meters/sec
 spd = (sqrt(uu.^2 + vv.^2));
-
-% Plotting speed to check that I haven't mishandled the grid
-figure
-p = surf(xxx,yyy,zeros(size(uu)),spd);
-hold on 
-title('Ice Surface Speed')
-set(p, 'edgecolor', 'none');
-view(2)
-axis equal
-setFontSize(16);
-c = colorbar;
-c.Label.String = 'Speed [m/yr]';
-
 
 % changing to xxx 
 b_raw =  bedmachine_interp('bed',xxx,yyy);
@@ -100,10 +84,8 @@ tau_interp = scatteredInterpolant(xy(:,1),xy(:,2),newtau);
 
 
 %% Calculate longitudinal and lateral forces 
-% .* for multiplying corresponding components
 
-
-% Effective strain rate - Paul
+% Effective strain rate --- the gradient is not working as expected
 e_eff = sqrt(.5*(ux.^2 + vy.^2) + (.5*(uy + vx)).^2);
 [e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dy);
 
@@ -218,9 +200,6 @@ view(2)
 subplot(222)
 p = surf(xxx,yyy,zeros(size(ss)),lon, "EdgeColor", "none");
 hold on
-%contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off')
-%contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
-%contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
 bedmachine('gl','color',rgb('gray'),'linewidth',2)
 title('Longitudinal Stresses')
 colorbar
@@ -229,9 +208,6 @@ view(2)
 subplot(223)
 p = surf(xxx,yyy,zeros(size(ss)),lat, "EdgeColor", "none");
 hold on
-%contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off')
-%contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
-%contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
 bedmachine('gl','color',rgb('gray'),'linewidth',2)
 title('Lateral Stresses')
 colorbar
@@ -240,17 +216,12 @@ view(2)
 subplot(224)
 p = surf(xxx,yyy,zeros(size(ss)),bed, "EdgeColor", "none");
 hold on
-%contour(xi,yi,spd, [30, 30] , 'k--','HandleVisibility','off')
-%contour(xi,yi,spd, [100, 300, 3000] , 'k-','HandleVisibility','off')
-%contour(xi,yi,spd, [1000, 1000] , 'k-','LineWidth',2)
 bedmachine('gl','color',rgb('gray'),'linewidth',2)
 title('Computed Basal Stresses')
 colorbar
 view(2)
 
 %% Plot tau 
-
-
 
 figure
 p = surf(xxx,yyy,zeros(size(ss)),tau_interp(xxx, yyy), "EdgeColor", "none");
