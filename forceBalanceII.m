@@ -66,9 +66,20 @@ h = sf-b;
 [spdyx, spdyy] = gradient(spdy,dx,dx);
 
 
-% Effective Strain
+% Effective Strain Rate
 e_eff = sqrt(.5*(ux.^2 + vy.^2) + (.5*(uy + vx)).^2);
 [e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dx);
+
+figure
+p = surf(Xi,Yi,zeros(size(u)),e_eff);
+hold on 
+title('e_eff')
+set(p, 'edgecolor', 'none');
+view(2)
+axis equal
+setFontSize(16);
+c = colorbar;
+%c.Label.String = 'Speed [m/yr]';
 
 % Deviatoric Stress
 prefactor = B * e_eff.^(1/3 - 1);
