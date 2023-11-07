@@ -27,7 +27,7 @@ if(~ismac && ~ispc)
 end
 
 % Name of scenarios to run, only 1 map file used here.
-nameToRun = ["ISSM"];
+nameToRun = ["ISSM_center"];
 mapsToRun = ["strainMesh035.mat"];
 config    = defaultConfig();
 
