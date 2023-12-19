@@ -28,13 +28,15 @@ ss2   = zeros(size(uO));
 [ovx ,  ovy] = gradient(vO,dx2,dx2);
 
 oe_eff = sqrt(.5*(oux.^2 + ovy.^2) + (.5*(ouy + ovx)).^2);
-[oe_effx, oe_effy] = gradient(oe_eff.^(1/3-1),dx2,dx2);
+%[oe_effx, oe_effy] = gradient(oe_eff.^(1/3-1),dx2,dx2);
+oe_eff_powered = oe_eff.^(1/3-1);
+[oe_effx,oe_effy] = gradient(oe_eff_powered,dx2,dx2);
 
 %% Model speeds
 % Get u,v and xy
 load data_strainMesh035ISSM_centerPaulsBase.mat
-dx = 259.6;
-dy = 252.23 ;
+dx = 100;
+dy = 100 ;
 xi = min(xy(:,1))-dx:dx:max(xy(:,1))+dx;
 yi = (min(xy(:,2))-dy:dy:max(xy(:,2))+dy);
 %xi = xy(:,1);
@@ -55,7 +57,20 @@ spd = sqrt(uu.^2 + vv.^2);
 [vx ,  vy] = gradient(vv,dx,dx);
 
 e_eff = sqrt(.5*(ux.^2 + vy.^2) + (.5*(uy + vx)).^2);
-[e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dx);
+%Finite Diff 
+e_effx_manual = zeros(size(e_eff));
+e_effy_manual = zeros(size(e_eff));
+
+for i = 2:size(e_eff, 2) - 1
+    for j = 2:size(e_eff, 1) - 1
+        e_effx_manual(j, i) = (e_eff(j, i + 1) - e_eff(j, i - 1)) / (2 * dx);
+        e_effy_manual(j, i) = (e_eff(j + 1, i) - e_eff(j - 1, i)) / (2 * dy);
+    end
+end
+
+
+%e_eff_powered = e_eff.^(1/3-1);
+%[e_effx, e_effy] = gradient(e_eff_powered,dx,dy);
 
 figure
 p = surf(xxx,yyy,zeros(size(ss)),spd);
@@ -104,7 +119,7 @@ c = colorbar;
 %c.Label.String = 'Speed [m/yr]';
 
 figure
-p = surf(xxx,yyy,zeros(size(uu)),e_effx);
+p = surf(xxx,yyy,zeros(size(uu)),e_effx_manual);
 hold on 
 title('model e_effx')
 set(p, 'edgecolor', 'none');

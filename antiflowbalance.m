@@ -15,9 +15,10 @@ load vel_profiles_paul_04_13.mat
 load data_strainMesh035ISSM_centeryesAdvectNewBase.mat
 
 % same xy from define tau, this xy are only used to create tau interpolant
-xii   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
-yii   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
-[Xii, Yii] = ndgrid(xii-307200, yii-307200); 
+% not able to open this, never had this problem before?
+%xii   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","x");
+%yii   = ncread("~/Documents/MATLAB/ISSM/JPL1_ISSM_init/strbasemag_AIS_JPL1_ISSM_init.nc","y");
+%[Xii, Yii] = ndgrid(xii-307200, yii-307200); 
 
 
 %% Get x and y coordinates of main anti-flow line
@@ -43,6 +44,7 @@ smth = 4e3;
 xi = min(xy(:,1))-dx:dx:max(xy(:,1))+dx;
 yi = (min(xy(:,2))-dy:dy:max(xy(:,2))+dy);
 [xxx,yyy] = ndgrid(xi,yi);
+
 
 us = scatteredInterpolant(xy(:,1),xy(:,2),u, 'linear', 'none');
 vs = scatteredInterpolant(xy(:,1),xy(:,2),v, 'linear', 'none');
@@ -78,17 +80,29 @@ Tdy = -rho * g * h .* sy.^2;
 Td  = sqrt(Tdx.^2 +  Tdy.^2);
 
 % Tau, on square grid but only evaluate in plot
-tau_c = defineTau("ISSM_center");
-newtau = tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2);
-tau_interp = scatteredInterpolant(xy(:,1),xy(:,2),newtau);
+%tau_c = defineTau("ISSM_center");
+%newtau = tau_c(xy(:,1),xy(:,2),u,v)./norms([u,v],2,2);
+%tau_interp = scatteredInterpolant(xy(:,1),xy(:,2),newtau);
 
 
 %% Calculate longitudinal and lateral forces 
 
 % Effective strain rate --- the gradient is not working as expected
 e_eff = sqrt(.5*(ux.^2 + vy.^2) + (.5*(uy + vx)).^2);
-[e_effx, e_effy] = gradient(e_eff.^(1/3-1),dx,dy);
+%Finite Diff 
+e_effx = zeros(size(e_eff));
+e_effy = zeros(size(e_eff));
 
+for i = 2:size(e_eff, 2) - 1
+    for j = 2:size(e_eff, 1) - 1
+        e_effx(j, i) = (e_eff(j, i + 1) - e_eff(j, i - 1)) / (2 * dx);
+        e_effy(j, i) = (e_eff(j + 1, i) - e_eff(j - 1, i)) / (2 * dy);
+    end
+end
+
+%e_eff_powered = e_eff.^(1/3-1);
+%[e_effx, e_effy] = gradient(e_eff_powered,dx,dy);
+% redo gradient in different ways, reshape problem?
 
 % Plotting to check
 figure
@@ -115,7 +129,7 @@ c = colorbar;
 
 
 % Will add "enhance" 
-taucheck = tau_interp(x_line1, y_line1);
+%taucheck = tau_interp(x_line1, y_line1);
 B = 1.6e8;
 A = 2.4e-25;
 E = enh(xxx,yyy);
